@@ -1,0 +1,162 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.itzrozzadev</groupId>
+    <artifactId>Foundation</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+    </properties>
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.20</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.13.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>AuthMe</artifactId>
+            <version>5.6.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/AuthMe-5.6.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>CitizensAPI</artifactId>
+            <version>2.0.27</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/CitizensAPI-2.0.27.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>DiscordSRV</artifactId>
+            <version>1.22.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/DiscordSRV-1.22.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>EssentialsX</artifactId>
+            <version>2.18.2.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/EssentialsX-2.18.2.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>Factions</artifactId>
+            <version>3.3.2</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/Factions-2.14.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>LWC</artifactId>
+            <version>2.2.7</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/LWC-2.2.7.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>MultiverseCore</artifactId>
+            <version>4.2.2</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/MultiverseCore-4.2.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>PAPI</artifactId>
+            <version>2.10.9</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/PAPI-2.10.9.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>4.6.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/ProtocolLib-4.6.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>Towny</artifactId>
+            <version>0.97.0.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/Towny-0.97.0.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>TownyChat</artifactId>
+            <version>0.88</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/TownyChat-0.88.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>Vault</artifactId>
+            <version>1.7.3</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/Vault-1.7.3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>WorldEdit</artifactId>
+            <version>7.2.5</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/WorldEdit-7.2.5.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.itzrozzadev.plugin</groupId>
+            <artifactId>WorldGuard</artifactId>
+            <version>7.0.4</version>
+            <scope>system</scope>
+            <systemPath>C:/Users/rorye/workspace/HookManger Plugins/WorldGuard-7.0.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.1</version>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
