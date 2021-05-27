@@ -81,12 +81,24 @@ public final class PlayerUtil {
 
 	/**
 	 * Teleports a player on top and in the center of a give location
-	 * @param player - The player being teleported
+	 *
+	 * @param player   - The player being teleported
 	 * @param location - The location the player is being teleported
 	 */
-	public static void teleport(Player player, Location location) {
-		if(location!= null)
-			player.teleport(location.clone().add(0.5,1,0.5));
+	public static void teleport(final Player player, final Location location) {
+		if (location != null)
+			player.teleport(location.clone().add(0.5, 1, 0.5));
+	}
+
+	/**
+	 * Teleports to a player on top but NOT centre of a give location
+	 *
+	 * @param player   - The player being teleported
+	 * @param location - The location the player is being teleported
+	 */
+	public static void teleportToLocation(final Player player, final Location location) {
+		if (location != null)
+			player.teleport(location.clone().add(0, 1, 0));
 	}
 
 	/**
