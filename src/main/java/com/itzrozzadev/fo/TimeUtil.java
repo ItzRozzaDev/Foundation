@@ -376,4 +376,36 @@ public final class TimeUtil {
 	}
 
 
+	// ------------------------------------------------------------------------------------------------------------
+	// Other Useful Methods
+	// ------------------------------------------------------------------------------------------------------------
+
+	/**
+	 * Returns the ticks value for the specified time of day
+	 * @param time - Time of day either a word or a tick value
+	 * @return - The tick long value or 0 if a invalid number
+	 */
+	public static long getTicks(final String time) {
+		switch (time) {
+			case "day":
+				return 1000;
+			case "midday":
+				return 6000;
+			case "night":
+				return 13000;
+			case "midnight":
+				return 18000;
+			case "sunrise":
+				return 23000;
+			default:
+				try {
+					return Integer.parseInt(time);
+				} catch (final NumberFormatException ex) {
+					return 0;
+				}
+		}
+	}
+
+
+
 }
