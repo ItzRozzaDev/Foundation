@@ -1,6 +1,7 @@
 package com.itzrozzadev.fo.settings;
 
 import com.itzrozzadev.fo.Common;
+import com.itzrozzadev.fo.FileUtil;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.collection.StrictList;
 import com.itzrozzadev.fo.constants.FoConstants;
@@ -10,6 +11,7 @@ import com.itzrozzadev.fo.exception.FoException;
 import com.itzrozzadev.fo.model.SpigotUpdater;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -292,5 +294,16 @@ public abstract class SimpleSettings extends YamlStaticConfig {
 	 */
 	public static void resetSettingsCall() {
 		settingsClassCalled = false;
+	}
+
+	/**
+	 *
+	 * @param fileName - The name of the config file
+	 * @return - The loaded configuration file
+	 */
+	protected static SimpleYaml loadConfigurationFile(String fileName){
+		final File configFile = FileUtil.extract(fileName);
+		YamlComments.writeComments(fileName, configFile);
+		return FileUtil.loadConfigurationStrict(configFile);
 	}
 }
