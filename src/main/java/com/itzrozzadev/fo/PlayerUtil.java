@@ -80,6 +80,16 @@ public final class PlayerUtil {
 	}
 
 	/**
+	 * Teleports a player on top and in the center of a give location
+	 * @param player - The player being teleported
+	 * @param location - The location the player is being teleported
+	 */
+	public static void teleport(Player player, Location location) {
+		if(location!= null)
+			player.teleport(location.clone().add(0.5,1,0.5));
+	}
+
+	/**
 	 * Return statistics of ALL offline players ever played
 	 *
 	 * @param statistic
