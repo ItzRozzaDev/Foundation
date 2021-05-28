@@ -270,7 +270,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The keys below are used in the {@link ReloadCommand}
 		 */
-		public static String RELOAD_DESCRIPTION = "Reloads the Plugin";
+		public static String RELOAD_DESCRIPTION = "Reloads the plugin";
 		public static String RELOAD_STARTED = "Reloading plugin, please wait..";
 		public static String RELOAD_SUCCESS = "&6{plugin_name} {plugin_version} has been reloaded.";
 		public static String RELOAD_FILE_LOAD_ERROR = "&4ERROR, &cthere was a problem loading files from your disk! See the console for more information. {plugin_name} has not been reloaded.";
