@@ -25,15 +25,15 @@ public abstract class SimpleSubCommand extends SimpleCommand {
 	 */
 	@Setter(value = AccessLevel.PROTECTED)
 	@Getter(value = AccessLevel.PROTECTED)
-	private String sublabel;
+	private String subLabel;
 
 	/**
 	 * Create a new subcommand given the main plugin instance defines a main command group
 	 *
-	 * @param sublabel
+	 * @param subLabel
 	 */
-	protected SimpleSubCommand(final String sublabel) {
-		this(getMainCommandGroup0(), sublabel);
+	protected SimpleSubCommand(final String subLabel) {
+		this(getMainCommandGroup0(), subLabel);
 	}
 
 	/*
@@ -56,9 +56,9 @@ public abstract class SimpleSubCommand extends SimpleCommand {
 		super(parent.getLabel());
 
 		this.sublabels = sublabel.split("([|/])");
-		Valid.checkBoolean(sublabels.length > 0, "Please set at least 1 sublabel");
+		Valid.checkBoolean(this.sublabels.length > 0, "Please set at least 1 sublabel");
 
-		this.sublabel = sublabels[0];
+		this.subLabel = this.sublabels[0];
 
 		// If the default perm was not changed, improve it
 		if (getRawPermission().equals(getDefaultPermission())) {
@@ -88,7 +88,7 @@ public abstract class SimpleSubCommand extends SimpleCommand {
 	 */
 	@Override
 	protected String replacePlaceholders(final String message) {
-		return super.replacePlaceholders(message).replace("{sublabel}", getSublabel());
+		return super.replacePlaceholders(message).replace("{sublabel}", getSubLabel());
 	}
 
 	@Override

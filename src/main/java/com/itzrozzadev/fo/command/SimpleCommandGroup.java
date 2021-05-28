@@ -110,18 +110,18 @@ public abstract class SimpleCommandGroup {
 	 * @param aliases
 	 */
 	public final void register(final String label, final List<String> aliases) {
-		Valid.checkBoolean(!isRegistered(), "Main command already registered as: " + mainCommand);
+		Valid.checkBoolean(!isRegistered(), "Main command already registered as: " + this.mainCommand);
 
-		mainCommand = new MainCommand(label);
+		this.mainCommand = new MainCommand(label);
 
 		if (aliases != null)
-			mainCommand.setAliases(aliases);
+			this.mainCommand.setAliases(aliases);
 
-		mainCommand.register();
+		this.mainCommand.register();
 		registerSubcommands();
 
 		// Sort A-Z
-		subcommands.getSource().sort(Comparator.comparing(SimpleSubCommand::getSublabel));
+		this.subcommands.getSource().sort(Comparator.comparing(SimpleSubCommand::getSubLabel));
 
 		// Check for collision
 		checkSubCommandAliasesCollision();
@@ -133,9 +133,9 @@ public abstract class SimpleCommandGroup {
 	private void checkSubCommandAliasesCollision() {
 		final List<String> aliases = new ArrayList<>();
 
-		for (final SimpleSubCommand subCommand : subcommands)
+		for (final SimpleSubCommand subCommand : this.subcommands)
 			for (final String alias : subCommand.getSublabels()) {
-				Valid.checkBoolean(!aliases.contains(alias), "Subcommand '/" + getLabel() + " " + subCommand.getSublabel() + "' has alias '" + alias + "' that is already in use by another subcommand!");
+				Valid.checkBoolean(!aliases.contains(alias), "Subcommand '/" + getLabel() + " " + subCommand.getSubLabel() + "' has alias '" + alias + "' that is already in use by another subcommand!");
 
 				aliases.add(alias);
 			}
@@ -147,10 +147,10 @@ public abstract class SimpleCommandGroup {
 	public final void unregister() {
 		Valid.checkBoolean(isRegistered(), "Main command not registered!");
 
-		mainCommand.unregister();
-		mainCommand = null;
+		this.mainCommand.unregister();
+		this.mainCommand = null;
 
-		subcommands.clear();
+		this.subcommands.clear();
 	}
 
 	/**
@@ -159,7 +159,7 @@ public abstract class SimpleCommandGroup {
 	 * @return
 	 */
 	public final boolean isRegistered() {
-		return mainCommand != null;
+		return this.mainCommand != null;
 	}
 
 	/**
@@ -190,10 +190,10 @@ public abstract class SimpleCommandGroup {
 	 * @param command
 	 */
 	protected final void registerSubcommand(final SimpleSubCommand command) {
-		Valid.checkNotNull(mainCommand, "Cannot add subcommands when main command is missing! Call register()");
-		Valid.checkBoolean(!subcommands.contains(command), "Subcommand /" + mainCommand.getLabel() + " " + command.getSublabel() + " already registered when trying to add " + command.getClass());
+		Valid.checkNotNull(this.mainCommand, "Cannot add subcommands when main command is missing! Call register()");
+		Valid.checkBoolean(!this.subcommands.contains(command), "Subcommand /" + this.mainCommand.getLabel() + " " + command.getSubLabel() + " already registered when trying to add " + command.getClass());
 
-		subcommands.add(command);
+		this.subcommands.add(command);
 	}
 
 	/**
@@ -203,9 +203,9 @@ public abstract class SimpleCommandGroup {
 	 * @param menuHelp
 	 */
 	protected final void registerHelpLine(final String... menuHelp) {
-		Valid.checkNotNull(mainCommand, "Cannot add subcommands when main command is missing! Call register()");
+		Valid.checkNotNull(this.mainCommand, "Cannot add subcommands when main command is missing! Call register()");
 
-		subcommands.add(new FillerSubCommand(this, menuHelp));
+		this.subcommands.add(new FillerSubCommand(this, menuHelp));
 	}
 
 	// ----------------------------------------------------------------------
@@ -220,7 +220,7 @@ public abstract class SimpleCommandGroup {
 	public final String getLabel() {
 		Valid.checkBoolean(isRegistered(), "Main command has not yet been set!");
 
-		return mainCommand.getMainLabel();
+		return this.mainCommand.getMainLabel();
 	}
 
 	/**
@@ -229,7 +229,7 @@ public abstract class SimpleCommandGroup {
 	 * @return
 	 */
 	public final List<String> getAliases() {
-		return mainCommand.getAliases();
+		return this.mainCommand.getAliases();
 	}
 
 	// ----------------------------------------------------------------------
@@ -324,11 +324,11 @@ public abstract class SimpleCommandGroup {
 	protected String[] getHelpHeader() {
 		return new String[]{
 				"&8",
-				themeColor + Common.chatLineSmooth(),
+				this.themeColor + Common.chatLineSmooth(),
 				getHeaderPrefix() + "  " + SimplePlugin.getNamed() + getTrademark() + " &7" + SimplePlugin.getVersion(),
 				" ",
-				requiredArgsColor + "  <> &f= " + requiredArgsColor + SimpleLocalization.Commands.LABEL_REQUIRED_ARGS,
-				optionalArgsColor + "  [] &f= " + optionalArgsColor + SimpleLocalization.Commands.LABEL_OPTIONAL_ARGS,
+				this.requiredArgsColor + "  <> &f= " + this.requiredArgsColor + SimpleLocalization.Commands.LABEL_REQUIRED_ARGS,
+				this.optionalArgsColor + "  [] &f= " + this.optionalArgsColor + SimpleLocalization.Commands.LABEL_OPTIONAL_ARGS,
 				" "
 		};
 	}
@@ -349,7 +349,7 @@ public abstract class SimpleCommandGroup {
 	 * @return
 	 */
 	protected String getHeaderPrefix() {
-		return "" + ChatColor.GOLD + ChatColor.BOLD;
+		return "" + getThemeColor() + ChatColor.BOLD;
 	}
 
 	// ----------------------------------------------------------------------
@@ -384,32 +384,32 @@ public abstract class SimpleCommandGroup {
 		protected void onCommand() {
 
 			// Print a special message on no arguments
-			if (args.length == 0) {
+			if (this.args.length == 0) {
 				if (sendHelpIfNoArgs())
 					tellSubcommandsHelp();
 				else
-					tell(getNoParamsHeader(sender));
+					tell(getNoParamsHeader(this.sender));
 
 				return;
 			}
 
-			final String argument = args[0];
+			final String argument = this.args[0];
 			final SimpleSubCommand command = findSubcommand(argument);
 
 			// Handle subcommands
 			if (command != null) {
-				final String oldSubLabel = command.getSublabel();
+				final String oldSubLabel = command.getSubLabel();
 
 				try {
 					// Simulate our main label
-					command.setSublabel(args[0]);
+					command.setSubLabel(this.args[0]);
 
 					// Run the command
-					command.execute(sender, getLabel(), args.length == 1 ? new String[]{} : Arrays.copyOfRange(args, 1, args.length));
+					command.execute(this.sender, getLabel(), this.args.length == 1 ? new String[]{} : Arrays.copyOfRange(this.args, 1, this.args.length));
 
 				} finally {
 					// Restore old sublabel after the command has been run
-					command.setSublabel(oldSubLabel);
+					command.setSubLabel(oldSubLabel);
 				}
 			}
 
@@ -433,7 +433,7 @@ public abstract class SimpleCommandGroup {
 
 			// Building help can be heavy so do it off of the main thread
 			Common.runAsync(() -> {
-				if (subcommands.isEmpty()) {
+				if (SimpleCommandGroup.this.subcommands.isEmpty()) {
 					tell(SimpleLocalization.Commands.HEADER_NO_SUBCOMMANDS);
 					return;
 				}
@@ -441,7 +441,7 @@ public abstract class SimpleCommandGroup {
 				final List<SimpleComponent> lines = new ArrayList<>();
 				final boolean atLeast17 = MinecraftVersion.atLeast(V.v1_7);
 
-				for (final SimpleSubCommand subcommand : subcommands)
+				for (final SimpleSubCommand subcommand : SimpleCommandGroup.this.subcommands)
 					if (subcommand.showInHelp() && hasPerm(subcommand.getPermission())) {
 						if (subcommand instanceof FillerSubCommand) {
 							tellNoPrefix(((FillerSubCommand) subcommand).getHelpMessages());
@@ -450,8 +450,8 @@ public abstract class SimpleCommandGroup {
 						final String usage = colorizeUsage(subcommand.getUsage());
 						final String desc = Common.getOrEmpty(subcommand.getDescription());
 						final String plainMessage = Replacer.replaceArray(getSubcommandDescription(),
-								"label", mainArgument + "/" + getLabel(),
-								"sublabel", firstArgument + subcommand.getSublabel(),
+								"label", SimpleCommandGroup.this.mainArgument + "/" + getLabel(),
+								"sublabel", SimpleCommandGroup.this.firstArgument + subcommand.getSubLabel(),
 								"usage", usage,
 								"description", !desc.isEmpty() && !atLeast17 ? desc : "",
 								"dash", !desc.isEmpty() && !atLeast17 ? "&e-" : "");
@@ -471,20 +471,20 @@ public abstract class SimpleCommandGroup {
 								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE);
 
 								for (final String usageLine : subcommand.getMultilineUsageMessage())
-									hover.add("&f" + replacePlaceholders(colorizeUsage(usageLine.replace("{sublabel}", subcommand.getSublabel()))));
+									hover.add("&f" + replacePlaceholders(colorizeUsage(usageLine.replace("{sublabel}", subcommand.getSubLabel()))));
 
 							} else
 								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE + (usage.isEmpty() ? command : usage));
 
 							line.onHover(hover);
-							line.onClickSuggestCmd("/" + getLabel() + " " + subcommand.getSublabel());
+							line.onClickSuggestCmd("/" + getLabel() + " " + subcommand.getSubLabel());
 						}
 
 						lines.add(line);
 					}
 
 				if (!lines.isEmpty()) {
-					final ChatPaginator pages = new ChatPaginator(MathUtil.range(0, lines.size(), commandsPerPage), themeColor);
+					final ChatPaginator pages = new ChatPaginator(MathUtil.range(0, lines.size(), SimpleCommandGroup.this.commandsPerPage), SimpleCommandGroup.this.themeColor);
 
 					if (getHelpHeader() != null)
 						if (SimplePlugin.getInstance().getMainCommand().getLabel().equals(this.getMainLabel()))
@@ -498,7 +498,7 @@ public abstract class SimpleCommandGroup {
 					pages.setArrowColor(getArrowColor());
 
 					// Send the component on the main thread
-					Common.runLater(() -> pages.send(sender));
+					Common.runLater(() -> pages.send(this.sender));
 
 				} else
 					tell(SimpleLocalization.Commands.HEADER_NO_SUBCOMMANDS_PERMISSION);
@@ -512,8 +512,8 @@ public abstract class SimpleCommandGroup {
 		 * @return
 		 */
 		private String colorizeUsage(final String message) {
-			return message == null ? "" : message.replace("<", requiredArgsColor + "<").replace(">", requiredArgsColor + ">&f")
-					.replace("[", optionalArgsColor + "[").replace("]", optionalArgsColor + "]&f").replaceAll(" -([a-zA-Z])", " &3-$1");
+			return message == null ? "" : message.replace("<", SimpleCommandGroup.this.requiredArgsColor + "<").replace(">", SimpleCommandGroup.this.requiredArgsColor + ">&f")
+					.replace("[", SimpleCommandGroup.this.optionalArgsColor + "[").replace("]", SimpleCommandGroup.this.optionalArgsColor + "]&f").replaceAll(" -([a-zA-Z])", " &3-$1");
 		}
 
 		/**
@@ -523,7 +523,7 @@ public abstract class SimpleCommandGroup {
 		 * @return
 		 */
 		private SimpleSubCommand findSubcommand(final String label) {
-			for (final SimpleSubCommand command : subcommands) {
+			for (final SimpleSubCommand command : SimpleCommandGroup.this.subcommands) {
 				if (command instanceof FillerSubCommand)
 					continue;
 
@@ -540,14 +540,14 @@ public abstract class SimpleCommandGroup {
 		 */
 		@Override
 		public List<String> tabComplete() {
-			if (args.length == 1)
-				return tabCompleteSubcommands(sender, args[0]);
+			if (this.args.length == 1)
+				return tabCompleteSubcommands(this.sender, this.args[0]);
 
-			if (args.length > 1) {
-				final SimpleSubCommand cmd = findSubcommand(args[0]);
+			if (this.args.length > 1) {
+				final SimpleSubCommand cmd = findSubcommand(this.args[0]);
 
 				if (cmd != null)
-					return cmd.tabComplete(sender, getLabel(), Arrays.copyOfRange(args, 1, args.length));
+					return cmd.tabComplete(this.sender, getLabel(), Arrays.copyOfRange(this.args, 1, this.args.length));
 			}
 
 			return null;
@@ -565,7 +565,7 @@ public abstract class SimpleCommandGroup {
 
 			final List<String> tab = new ArrayList<>();
 
-			for (final SimpleSubCommand subcommand : subcommands)
+			for (final SimpleSubCommand subcommand : SimpleCommandGroup.this.subcommands)
 				if (subcommand.showInHelp() && !(subcommand instanceof FillerSubCommand) && hasPerm(subcommand.getPermission()))
 					for (final String label : subcommand.getSublabels())
 						if (!label.trim().isEmpty() && label.startsWith(param))

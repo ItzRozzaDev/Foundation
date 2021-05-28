@@ -315,7 +315,7 @@ public abstract class SimpleCommand extends Command {
 			Common.ADD_TELL_PREFIX = this.addTellPrefix;
 
 		// Optional subLabel if this is a sub command
-		final String subLabel = this instanceof SimpleSubCommand ? " " + ((SimpleSubCommand) this).getSublabel() : "";
+		final String subLabel = this instanceof SimpleSubCommand ? " " + ((SimpleSubCommand) this).getSubLabel() : "";
 
 		// Catch "errors" that contain a message to send to the player
 		// Measure performance of all commands
@@ -359,7 +359,6 @@ public abstract class SimpleCommand extends Command {
 						pages.add("");
 						pages.add(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_PERMISSION + " &f" + getPermission());
 					}
-
 
 					pages.add(HEADER_SECONDARY_COLOR + Common.chatLineSmooth());
 					paginator.setFoundationHeader(SimpleLocalization.Commands.LABEL_HELP_FOR.replace("{label}", getLabel() + subLabel)).setPages(Common.toArray(pages));
@@ -445,7 +444,7 @@ public abstract class SimpleCommand extends Command {
 	protected abstract void onCommand();
 
 	/**
-	 * Get a custom multilined usagem message to be shown instead of the one line one
+	 * Get a custom multilined usage message to be shown instead of the one line one
 	 *
 	 * @return the multiline custom usage message, or null
 	 */
