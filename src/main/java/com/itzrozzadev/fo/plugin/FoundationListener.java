@@ -64,7 +64,6 @@ final class FoundationListener implements Listener {
 
 		if (!player.hasMetadata(ChatPaginator.getPageNbtTag())) {
 			event.setCancelled(true);
-
 			return;
 		}
 
@@ -113,7 +112,7 @@ final class FoundationListener implements Listener {
 
 			if (whiteLines == 15 && pages.size() == 1) {
 				if (messagesOnPage.size() < 17)
-					whiteLines = 7;
+					whiteLines = messagesOnPage.size();
 				else
 					whiteLines += 2;
 			}

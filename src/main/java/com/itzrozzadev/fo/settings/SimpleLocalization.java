@@ -3,7 +3,6 @@ package com.itzrozzadev.fo.settings;
 import com.itzrozzadev.fo.FileUtil;
 import com.itzrozzadev.fo.SerializeUtil;
 import com.itzrozzadev.fo.Valid;
-import com.itzrozzadev.fo.command.SimpleCommand;
 import com.itzrozzadev.fo.command.examples.DebugCommand;
 import com.itzrozzadev.fo.command.examples.PermsCommand;
 import com.itzrozzadev.fo.model.ChatPaginator;
@@ -237,7 +236,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		public static String LABEL_REQUIRED_ARGS = "required arguments";
 
 		/**
-		 * The multiline usages label, see {@link SimpleCommand#getMultilineUsageMessage()}
+		 * The multiline usages label
 		 */
 		public static String LABEL_USAGES = "&lUsages:";
 
@@ -245,6 +244,11 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		 * The usage label
 		 */
 		public static String LABEL_USAGE = "&lUsage:";
+
+		/**
+		 * The permission label
+		 */
+		public static String LABEL_PERMISSION = "&lPermission:";
 
 		/**
 		 * The help for label
