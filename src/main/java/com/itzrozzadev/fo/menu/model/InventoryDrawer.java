@@ -60,11 +60,11 @@ public final class InventoryDrawer {
 	public void pushItem(final ItemStack item) {
 		boolean added = false;
 
-		for (int i = 0; i < content.length; i++) {
-			final ItemStack currentItem = content[i];
+		for (int i = 0; i < this.content.length; i++) {
+			final ItemStack currentItem = this.content[i];
 
 			if (currentItem == null) {
-				content[i] = item;
+				this.content[i] = item;
 				added = true;
 
 				break;
@@ -72,7 +72,7 @@ public final class InventoryDrawer {
 		}
 
 		if (!added)
-			content[size - 1] = item;
+			this.content[this.size - 1] = item;
 	}
 
 	/**
@@ -92,7 +92,7 @@ public final class InventoryDrawer {
 	 * @return
 	 */
 	public ItemStack getItem(final int slot) {
-		return slot < content.length ? content[slot] : null;
+		return slot < this.content.length ? this.content[slot] : null;
 	}
 
 	/**
@@ -102,7 +102,7 @@ public final class InventoryDrawer {
 	 * @param item
 	 */
 	public void setItem(final int slot, final ItemStack item) {
-		content[slot] = item;
+		this.content[slot] = item;
 	}
 
 	/**
@@ -113,8 +113,8 @@ public final class InventoryDrawer {
 	 * @param newContent the new content
 	 */
 	public void setContent(final ItemStack[] newContent) {
-		for (int i = 0; i < content.length; i++)
-			content[i] = i < newContent.length ? newContent[i] : new ItemStack(CompMaterial.AIR.getMaterial());
+		for (int i = 0; i < this.content.length; i++)
+			this.content[i] = i < newContent.length ? newContent[i] : new ItemStack(CompMaterial.AIR.getMaterial());
 	}
 
 	/**
@@ -133,11 +133,15 @@ public final class InventoryDrawer {
 	 */
 	public void display(final Player player) {
 		final Inventory inv = this.build(player);
-
+		Common.log(String.valueOf(player.getOpenInventory()));
 		// Before opening make sure we close his old inventory if exist
-		if (player.getOpenInventory() != null)
-			player.closeInventory();
-
+		if (player.getOpenInventory() != null) {
+			if (inv.getSize() == player.getOpenInventory().getTopInventory().getSize()) {
+				player.getOpenInventory().getTopInventory().setContents(inv.getContents());
+				player.updateInventory();
+				return;
+			}
+		}
 		player.openInventory(inv);
 	}
 
@@ -158,10 +162,8 @@ public final class InventoryDrawer {
 	 */
 	public Inventory build(@Nullable final InventoryHolder holder) {
 		// Automatically append the black color in the menu, can be overriden by colors
-		final Inventory inv = Bukkit.createInventory(holder, size, Common.colorize("&0" + title));
-
-		inv.setContents(content);
-
+		final Inventory inv = Bukkit.createInventory(holder, this.size, Common.colorize("&0" + this.title));
+		inv.setContents(this.content);
 		return inv;
 	}
 
