@@ -513,8 +513,8 @@ public final class PlayerUtil {
 	 * @param vanishedPlayer - Player unvanished
 	 */
 	public static void showPlayerRemoveMeta(final Player vanishedPlayer) {
-		showPlayer(vanishedPlayer);
-		CompMetadata.removeMetadata(vanishedPlayer, "vanished");
+		PlayerUtil.showPlayer(vanishedPlayer);
+		CompMetadata.addTempMetadata(vanishedPlayer, "vanished", String.valueOf(false));
 	}
 
 
