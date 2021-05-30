@@ -102,7 +102,6 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 	/**
 	 * Returns the instance of {@link SimplePlugin}.
-	 * <p>
 	 * It is recommended to override this in your own {@link SimplePlugin}
 	 * implementation so you will get the instance of that, directly.
 	 *
@@ -132,7 +131,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 *
 	 * @return if the instance has been set.
 	 */
-	public static final boolean hasInstance() {
+	public static boolean hasInstance() {
 		return instance != null;
 	}
 
@@ -202,12 +201,12 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		// Check if Foundation is correctly moved
 		checkShading();
 
-		if (!isEnabled)
+		if (!this.isEnabled)
 			return;
 
 		// Before all, check if necessary libraries and the minimum required MC version
 		if (!checkLibraries0() || !checkServerVersions0()) {
-			isEnabled = false;
+			this.isEnabled = false;
 			setEnabled(false);
 
 			return;
@@ -239,7 +238,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		// --------------------------------------------
 
 		// Return if plugin pre start indicated a fatal problem
-		if (!isEnabled || !isEnabled())
+		if (!this.isEnabled || !isEnabled())
 			return;
 
 		try {
@@ -251,7 +250,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				Valid.checkBoolean(SimpleSettings.isSettingsCalled() != null && SimpleLocalization.isLocalizationCalled() != null, "Developer forgot to call Settings or Localization");
 			}
 
-			if (!isEnabled || !isEnabled())
+			if (!this.isEnabled || !isEnabled())
 				return;
 
 			// Register classes
@@ -265,7 +264,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				Common.throwError(throwable, "Error while loading " + getName() + " dependencies!");
 			}
 
-			if (!isEnabled || !isEnabled())
+			if (!this.isEnabled || !isEnabled())
 				return;
 
 			// Load legacy permanent metadata store
@@ -275,24 +274,24 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			if (getMainCommand() != null) {
 				Valid.checkBoolean(!SimpleSettings.MAIN_COMMAND_ALIASES.isEmpty(), "Please make a settings class extending SimpleSettings and specify Command_Aliases in your settings file.");
 
-				reloadables.registerCommands(SimpleSettings.MAIN_COMMAND_ALIASES, getMainCommand());
+				this.reloadables.registerCommands(SimpleSettings.MAIN_COMMAND_ALIASES, getMainCommand());
 			}
 
 			// --------------------------------------------
 			// Call the main start method
 			// --------------------------------------------
-			if (!isEnabled || !isEnabled())
+			if (!this.isEnabled || !isEnabled())
 				return;
 
-			startingReloadables = true;
+			this.startingReloadables = true;
 			onReloadablesStart();
-			startingReloadables = false;
+			this.startingReloadables = false;
 
 			onPluginStart();
 			// --------------------------------------------
 
 			// Return if plugin start indicated a fatal problem
-			if (!isEnabled || !isEnabled())
+			if (!this.isEnabled || !isEnabled())
 				return;
 
 			// Register BungeeCord when used
@@ -319,7 +318,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				discord.resubscribe();
 				discord.registerHook();
 
-				reloadables.registerEvents(DiscordListener.DiscordListenerImpl.getInstance());
+				this.reloadables.registerEvents(DiscordListener.DiscordListenerImpl.getInstance());
 			}
 
 			// Set the logging and tell prefix
@@ -350,7 +349,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			messenger.registerIncomingPluginChannel(this, bungee.getChannel(), bungee.getListener());
 			messenger.registerOutgoingPluginChannel(this, bungee.getChannel());
 
-			reloadables.registerEvents(bungee.getListener());
+			this.reloadables.registerEvents(bungee.getListener());
 			Debugger.debug("bungee", "Registered BungeeCord listener for " + bungee.getChannel());
 		}
 	}
@@ -454,7 +453,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	private void checkShading() {
 		try {
 			throw new ShadingException();
-		} catch (final Throwable t) {
+		} catch (final Throwable ignored) {
 		}
 	}
 
@@ -484,7 +483,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				Bukkit.getLogger().severe("Foundation package: " + SimplePlugin.class.getPackage().getName());
 				Bukkit.getLogger().severe(Common.consoleLine());
 
-				isEnabled = false;
+				SimplePlugin.this.isEnabled = false;
 			}
 		}
 	}
@@ -535,7 +534,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	private boolean checkServerVersions0() {
 
 		// Call the static block to test compatibility early
-		if (!MinecraftVersion.getCurrent().isTested())
+		if (!MinecraftVersion.getCurrent().isTested()) {
 			Common.logFramed(
 					"*** WARNING ***",
 					"Your Minecraft version " + MinecraftVersion.getCurrent() + " has not yet",
@@ -544,6 +543,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 					"",
 					"Loading the plugin at your own risk...",
 					Common.consoleLine());
+		}
 
 		// Check min version
 		final MinecraftVersion.V minimumVersion = getMinimumVersion();
@@ -629,7 +629,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	public final void onDisable() {
 
 		// If the early startup was interrupted, do not call shutdown methods
-		if (!isEnabled)
+		if (!this.isEnabled)
 			return;
 
 		try {
@@ -747,7 +747,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			}
 
 			onPluginPreReload();
-			reloadables.reload();
+			this.reloadables.reload();
 
 			YamlConfig.clearLoadedFiles();
 
@@ -762,20 +762,20 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			onPluginReload();
 
 			// Something went wrong in the reload pipeline
-			if (!isEnabled || !isEnabled())
+			if (!this.isEnabled || !isEnabled())
 				return;
 
 			if (getMainCommand() != null)
-				reloadables.registerCommands(SimpleSettings.MAIN_COMMAND_ALIASES, getMainCommand());
+				this.reloadables.registerCommands(SimpleSettings.MAIN_COMMAND_ALIASES, getMainCommand());
 
-			startingReloadables = true;
+			this.startingReloadables = true;
 			onReloadablesStart();
-			startingReloadables = false;
+			this.startingReloadables = false;
 
 			if (HookManager.isDiscordSRVLoaded()) {
 				DiscordListener.DiscordListenerImpl.getInstance().resubscribe();
 
-				reloadables.registerEvents(DiscordListener.DiscordListenerImpl.getInstance());
+				this.reloadables.registerEvents(DiscordListener.DiscordListenerImpl.getInstance());
 			}
 
 			registerBungeeCord();
@@ -824,8 +824,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 */
 	protected final void registerEventsIf(final Listener listener, final boolean condition) {
 		if (condition)
-			if (startingReloadables)
-				reloadables.registerEvents(listener);
+			if (this.startingReloadables)
+				this.reloadables.registerEvents(listener);
 			else
 				registerEvents(listener);
 	}
@@ -836,8 +836,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 * @param listener
 	 */
 	protected final void registerEvents(final Listener listener) {
-		if (startingReloadables)
-			reloadables.registerEvents(listener);
+		if (this.startingReloadables)
+			this.reloadables.registerEvents(listener);
 		else
 			getServer().getPluginManager().registerEvents(listener, this);
 
@@ -853,8 +853,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 */
 	protected final void registerEventsIf(final SimpleListener<? extends Event> listener, final boolean condition) {
 		if (condition)
-			if (startingReloadables)
-				reloadables.registerEvents(listener);
+			if (this.startingReloadables)
+				this.reloadables.registerEvents(listener);
 			else
 				registerEvents(listener);
 	}
@@ -865,8 +865,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 * @param listener
 	 */
 	protected final void registerEvents(final SimpleListener<? extends Event> listener) {
-		if (startingReloadables)
-			reloadables.registerEvents(listener);
+		if (this.startingReloadables)
+			this.reloadables.registerEvents(listener);
 		else
 			listener.register();
 	}
@@ -911,7 +911,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		if (getMainCommand() != null && getMainCommand().getLabel().equals(labelAndAliases.get(0)))
 			throw new FoException("Your main command group is registered automatically!");
 
-		reloadables.registerCommands(labelAndAliases, group);
+		this.reloadables.registerCommands(labelAndAliases, group);
 	}
 
 	// ----------------------------------------------------------------------------------------

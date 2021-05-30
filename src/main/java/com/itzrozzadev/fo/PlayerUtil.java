@@ -58,6 +58,17 @@ public final class PlayerUtil {
 	// ------------------------------------------------------------------------------------------------------------
 
 	/**
+	 * Convenience method for doing something to all online players
+	 *
+	 * @param consumer - Action to all online players
+	 */
+	public static void forEachOnlinePlayer(final Consumer<Player> consumer) {
+		for (final Player player : Remain.getOnlinePlayers()) {
+			consumer.accept(player);
+		}
+	}
+
+	/**
 	 * Kicks the player on the main thread with a colorized message
 	 *
 	 * @param player
@@ -288,11 +299,8 @@ public final class PlayerUtil {
 	/**
 	 * Sets pretty much every flag the player can have such as
 	 * flying etc, back to normal
-	 * <p>
 	 * Also sets gamemode to survival
-	 * <p>
 	 * Typical usage: Minigame plugins - call this before joining the player to an arena
-	 * <p>
 	 * Even disables Essentials god mode and removes vanish (most vanish plugins are supported).
 	 *
 	 * @param player
@@ -305,11 +313,8 @@ public final class PlayerUtil {
 	/**
 	 * Sets pretty much every flag the player can have such as
 	 * flying etc, back to normal
-	 * <p>
 	 * Also sets gamemode to survival
-	 * <p>
 	 * Typical usage: Minigame plugins - call this before joining the player to an arena
-	 * <p>
 	 * Even disables Essentials god mode.
 	 *
 	 * @param player
@@ -460,7 +465,43 @@ public final class PlayerUtil {
 	}
 
 	/**
-	 * Return true if the player is vanished. We check for Essentials and CMI vanish and also "vanished"
+	 * Vanish a player
+	 *
+	 * @param vanishingPlayer - Player being vanished
+	 */
+	public static void vanishPlayer(final Player vanishingPlayer) {
+		for (final Player onlinePlayer : Remain.getOnlinePlayers()) {
+			onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
+		}
+	}
+
+	/**
+	 * Vanish a player but not from those with the given permission
+	 *
+	 * @param vanishingPlayer - Player being vanish
+	 * @param permission      - Permission to see vanished players
+	 */
+	public static void vanishPlayer(final Player vanishingPlayer, final String permission) {
+		for (final Player onlinePlayer : Remain.getOnlinePlayers()) {
+			if (onlinePlayer.hasPermission(permission))
+				return;
+			onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
+		}
+	}
+
+	/**
+	 * Unvanish the given player
+	 *
+	 * @param vanishedPlayer - Player unvanished
+	 */
+	public static void showPlayer(final Player vanishedPlayer) {
+		if (isVanished(vanishedPlayer))
+			forEachOnlinePlayer((onlinePlayer) -> onlinePlayer.showPlayer(SimplePlugin.getInstance(), vanishedPlayer));
+	}
+
+
+	/**
+	 * Return true if the player is vanished. We check for Essentials vanish and also "vanished"
 	 * metadata value which is supported by most plugins
 	 *
 	 * @param player
@@ -469,6 +510,10 @@ public final class PlayerUtil {
 	public static boolean isVanished(final Player player) {
 		if (HookManager.isVanished(player))
 			return true;
+		return isVanishedMeta(player);
+	}
+
+	public static boolean isVanishedMeta(final Player player) {
 
 		if (player.hasMetadata("vanished"))
 			for (final MetadataValue meta : player.getMetadata("vanished"))
