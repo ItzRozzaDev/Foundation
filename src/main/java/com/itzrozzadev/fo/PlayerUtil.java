@@ -517,7 +517,6 @@ public final class PlayerUtil {
 		CompMetadata.addTempMetadata(vanishedPlayer, "vanished", String.valueOf(false));
 	}
 
-
 	/**
 	 * Return true if the player is vanished. We check for Essentials vanish and also "vanished"
 	 * metadata value which is supported by most plugins

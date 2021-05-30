@@ -61,8 +61,8 @@ public abstract class SimpleCommand extends Command {
 	 *
 	 * @return
 	 */
-	protected static String getDefaultPermission() {
-		return SimplePlugin.getNamed().toLowerCase() + ".command.{label}";
+	protected static String getDefaultPermission(final String label) {
+		return SimplePlugin.getNamed().toLowerCase() + ".command." + label;
 	}
 
 	/**
@@ -183,7 +183,7 @@ public abstract class SimpleCommand extends Command {
 			setAliases(aliases);
 
 		// Set a default permission for this command
-		setPermission(getDefaultPermission());
+		setPermission(getDefaultPermission(label));
 	}
 
 	/*
