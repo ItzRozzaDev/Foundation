@@ -486,6 +486,12 @@ public final class PlayerUtil {
 		}
 	}
 
+	/**
+	 * Vanish a player but not from those with the given permission and add "vanished" metadata to player
+	 *
+	 * @param vanishingPlayer - Player being vanish
+	 * @param permission      - Permission to see vanished players
+	 */
 	public static void vanishPlayerAddMeta(final Player vanishingPlayer, final String permission) {
 		vanishPlayer(vanishingPlayer, permission);
 		CompMetadata.addTempMetadata(vanishingPlayer, "vanished");
@@ -499,6 +505,16 @@ public final class PlayerUtil {
 	public static void showPlayer(final Player vanishedPlayer) {
 		if (isVanished(vanishedPlayer))
 			forEachOnlinePlayer((onlinePlayer) -> onlinePlayer.showPlayer(SimplePlugin.getInstance(), vanishedPlayer));
+	}
+
+	/**
+	 * Unvanish the given player and remove "vanished" metadata
+	 *
+	 * @param vanishedPlayer - Player unvanished
+	 */
+	public static void showPlayerRemoveMeta(final Player vanishedPlayer) {
+		showPlayer(vanishedPlayer);
+		CompMetadata.removeMetadata(vanishedPlayer, "vanished");
 	}
 
 
