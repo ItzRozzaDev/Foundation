@@ -7,10 +7,7 @@ import com.itzrozzadev.fo.jsonsimple.JSONParser;
 import com.itzrozzadev.fo.menu.Menu;
 import com.itzrozzadev.fo.model.HookManager;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
-import com.itzrozzadev.fo.remain.CompAttribute;
-import com.itzrozzadev.fo.remain.CompMaterial;
-import com.itzrozzadev.fo.remain.CompProperty;
-import com.itzrozzadev.fo.remain.Remain;
+import com.itzrozzadev.fo.remain.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang.ArrayUtils;
@@ -487,6 +484,11 @@ public final class PlayerUtil {
 				return;
 			onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
 		}
+	}
+
+	public static void vanishPlayerAddMeta(final Player vanishingPlayer, final String permission) {
+		vanishPlayer(vanishingPlayer, permission);
+		CompMetadata.addTempMetadata(vanishingPlayer, "vanished");
 	}
 
 	/**

@@ -370,17 +370,28 @@ public final class CompMetadata {
 	}
 
 	/**
+	 * Add temporary metadata to the entity
+	 *
+	 * @param entity - Entity the metadata is being added to
+	 * @param tag    - Metadata tag being added to the entity
+	 */
+	public static void addTempMetadata(final Entity entity, final String tag) {
+		entity.setMetadata(tag, new FixedMetadataValue(SimplePlugin.getInstance(), tag));
+	}
+
+	/**
 	 * Remove temporary metadata from the entity
 	 *
-	 * @param player
-	 * @param tag
+	 * @param entity - Entity the metadata is being removed from
+	 * @param tag    - - Metadata tag being removed from the entity
 	 */
-	public static void removeTempMetadata(final Entity player, final String tag) {
+	public static void removeMetadata(final Entity entity, final String tag) {
 		final String key = createTempMetadataKey(tag);
 
-		if (player.hasMetadata(key))
-			player.removeMetadata(key, SimplePlugin.getInstance());
+		if (entity.hasMetadata(key))
+			entity.removeMetadata(key, SimplePlugin.getInstance());
 	}
+
 
 	/*
 	 * Create a new temporary metadata key
@@ -424,7 +435,7 @@ public final class CompMetadata {
 
 		private void loadEntities() {
 			synchronized (LOCK) {
-				entityMetadataMap.clear();
+				this.entityMetadataMap.clear();
 
 				for (final String uuidName : getMap("Entity").keySet()) {
 					final UUID uuid = UUID.fromString(uuidName);
@@ -441,7 +452,7 @@ public final class CompMetadata {
 
 					// Check if the entity is still real
 					if (!metadata.isEmpty() && entity != null && entity.isValid() && !entity.isDead()) {
-						entityMetadataMap.put(uuid, metadata);
+						this.entityMetadataMap.put(uuid, metadata);
 
 						applySavedMetadata(metadata, entity);
 					}
@@ -453,7 +464,7 @@ public final class CompMetadata {
 
 		private void loadBlockStates() {
 			synchronized (LOCK) {
-				blockMetadataMap.clear();
+				this.blockMetadataMap.clear();
 
 				for (final String locationRaw : getMap("Block").keySet()) {
 					final Location location = SerializeUtil.deserializeLocation(locationRaw);
@@ -463,7 +474,7 @@ public final class CompMetadata {
 
 					// Check if the block remained the same
 					if (!CompMaterial.isAir(block) && CompMaterial.fromBlock(block) == blockCache.getType()) {
-						blockMetadataMap.put(location, blockCache);
+						this.blockMetadataMap.put(location, blockCache);
 
 						applySavedMetadata(blockCache.getMetadata(), block);
 					}
@@ -492,7 +503,7 @@ public final class CompMetadata {
 
 		protected void addMetadata(final Entity entity, @NonNull final String key, final String value) {
 			synchronized (LOCK) {
-				final List<String> metadata = entityMetadataMap.getOrPut(entity.getUniqueId(), new ArrayList<>());
+				final List<String> metadata = this.entityMetadataMap.getOrPut(entity.getUniqueId(), new ArrayList<>());
 
 				metadata.removeIf(meta -> getTag(meta, key) != null);
 
@@ -502,13 +513,13 @@ public final class CompMetadata {
 					metadata.add(formatted);
 				}
 
-				save("Entity", entityMetadataMap);
+				save("Entity", this.entityMetadataMap);
 			}
 		}
 
 		protected void addMetadata(final BlockState blockState, final String key, final String value) {
 			synchronized (LOCK) {
-				final BlockCache blockCache = blockMetadataMap.getOrPut(blockState.getLocation(), new BlockCache(CompMaterial.fromBlock(blockState.getBlock()), new ArrayList<>()));
+				final BlockCache blockCache = this.blockMetadataMap.getOrPut(blockState.getLocation(), new BlockCache(CompMaterial.fromBlock(blockState.getBlock()), new ArrayList<>()));
 
 				blockCache.getMetadata().removeIf(meta -> getTag(meta, key) != null);
 
@@ -519,7 +530,7 @@ public final class CompMetadata {
 				}
 
 				{ // Save
-					for (final Map.Entry<Location, BlockCache> entry : blockMetadataMap.entrySet())
+					for (final Map.Entry<Location, BlockCache> entry : this.blockMetadataMap.entrySet())
 						setNoSave("Block." + SerializeUtil.serializeLoc(entry.getKey()), entry.getValue().serialize());
 
 					save();
@@ -544,8 +555,8 @@ public final class CompMetadata {
 			public SerializedMap serialize() {
 				final SerializedMap map = new SerializedMap();
 
-				map.put("Type", type.toString());
-				map.put("Metadata", metadata);
+				map.put("Type", this.type.toString());
+				map.put("Metadata", this.metadata);
 
 				return map;
 			}
