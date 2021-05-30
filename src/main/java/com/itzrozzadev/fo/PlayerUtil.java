@@ -494,7 +494,7 @@ public final class PlayerUtil {
 	 */
 	public static void vanishPlayerAddMeta(final Player vanishingPlayer, final String permission) {
 		vanishPlayer(vanishingPlayer, permission);
-		CompMetadata.addTempMetadata(vanishingPlayer, "vanished");
+		CompMetadata.addTempMetadata(vanishingPlayer, "vanished", String.valueOf(true));
 	}
 
 	/**

@@ -380,6 +380,18 @@ public final class CompMetadata {
 	}
 
 	/**
+	 * Add temporary metadata to the entity
+	 *
+	 * @param entity - Entity the metadata is being added to
+	 * @param tag    - Metadata tag being added to the entity
+	 * @param value  - Value of the metadata
+	 */
+
+	public static void addTempMetadata(final Entity entity, final String tag, final String value) {
+		entity.setMetadata(tag, new FixedMetadataValue(SimplePlugin.getInstance(), value));
+	}
+
+	/**
 	 * Remove temporary metadata from the entity
 	 *
 	 * @param entity - Entity the metadata is being removed from
