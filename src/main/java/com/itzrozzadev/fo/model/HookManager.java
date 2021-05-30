@@ -15,7 +15,6 @@ import com.itzrozzadev.fo.exception.FoException;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
 import com.itzrozzadev.fo.region.Region;
 import com.itzrozzadev.fo.remain.Remain;
-import com.massivecraft.factions.entity.*;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import com.onarandombox.MultiverseCore.api.MultiverseWorld;
 import com.palmergames.bukkit.towny.TownyUniverse;
@@ -807,6 +806,16 @@ public final class HookManager {
 	}
 
 	/**
+	 * Return the online nation players in players ally (Towny), or an empty list
+	 *
+	 * @param player
+	 * @return
+	 */
+	public static Collection<? extends Player> getAllyPlayersOnline(final Player player) {
+		return isTownyLoaded() ? townyHook.getAllyPlayersOnline(player) : new ArrayList<>();
+	}
+
+	/**
 	 * Return the town owner name at the given location or null if none
 	 *
 	 * @param location
@@ -815,6 +824,7 @@ public final class HookManager {
 	public static String getTownOwner(final Location location) {
 		return isTownyLoaded() ? townyHook.getTownName(location) : null;
 	}
+
 
 	/**
 	 * Return the town name at the given location or null if none
@@ -1267,7 +1277,7 @@ class EssentialsHook {
 	private final Essentials ess;
 
 	EssentialsHook() {
-		ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
+		this.ess = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
 	}
 
 	void setGodMode(final Player player, final boolean godMode) {
@@ -1279,8 +1289,8 @@ class EssentialsHook {
 
 	void setIgnore(final UUID player, final UUID toIgnore, final boolean ignore) {
 		try {
-			final com.earth2me.essentials.User user = ess.getUser(player);
-			final com.earth2me.essentials.User toIgnoreUser = ess.getUser(toIgnore);
+			final com.earth2me.essentials.User user = this.ess.getUser(player);
+			final com.earth2me.essentials.User toIgnoreUser = this.ess.getUser(toIgnore);
 
 			if (toIgnoreUser != null)
 				user.setIgnoredPlayer(toIgnoreUser, ignore);
@@ -1291,8 +1301,8 @@ class EssentialsHook {
 
 	boolean isIgnoring(final UUID player, final UUID ignoringPlayer) {
 		try {
-			final com.earth2me.essentials.User user = ess.getUser(player);
-			final com.earth2me.essentials.User ignored = ess.getUser(ignoringPlayer);
+			final com.earth2me.essentials.User user = this.ess.getUser(player);
+			final com.earth2me.essentials.User ignored = this.ess.getUser(ignoringPlayer);
 
 			return user != null && ignored != null && user.isIgnoredPlayer(ignored);
 
@@ -1378,7 +1388,7 @@ class EssentialsHook {
 	}
 
 	String getNameFromNick(final String maybeNick) {
-		final UserMap users = ess.getUserMap();
+		final UserMap users = this.ess.getUserMap();
 
 		if (users != null)
 			for (final UUID userId : users.getAllUniqueUsers()) {
@@ -1403,40 +1413,40 @@ class EssentialsHook {
 	}
 
 	private User getUser(final String name) {
-		if (ess.getUserMap() == null)
+		if (this.ess.getUserMap() == null)
 			return null;
 
 		User user = null;
 
 		try {
-			user = ess.getUserMap().getUser(name);
+			user = this.ess.getUserMap().getUser(name);
 		} catch (final Throwable t) {
 		}
 
 		if (user == null)
 			try {
-				user = ess.getUserMap().getUserFromBukkit(name);
+				user = this.ess.getUserMap().getUserFromBukkit(name);
 
 			} catch (final Throwable ex) {
-				user = ess.getUser(name);
+				user = this.ess.getUser(name);
 			}
 		return user;
 	}
 
 	private User getUser(final UUID uniqueId) {
-		if (ess.getUserMap() == null)
+		if (this.ess.getUserMap() == null)
 			return null;
 
 		User user = null;
 
 		try {
-			user = ess.getUserMap().getUser(uniqueId);
+			user = this.ess.getUserMap().getUser(uniqueId);
 		} catch (final Throwable t) {
 		}
 
 		if (user == null)
 			try {
-				user = ess.getUser(uniqueId);
+				user = this.ess.getUser(uniqueId);
 			} catch (final Throwable ex) {
 			}
 
@@ -1450,11 +1460,11 @@ class MultiverseHook {
 	private final MultiverseCore multiVerse;
 
 	MultiverseHook() {
-		multiVerse = (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core");
+		this.multiVerse = (MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core");
 	}
 
 	String getWorldAlias(final String world) {
-		final MultiverseWorld mvWorld = multiVerse.getMVWorldManager().getMVWorld(world);
+		final MultiverseWorld mvWorld = this.multiVerse.getMVWorldManager().getMVWorld(world);
 
 		if (mvWorld != null)
 			return mvWorld.getColoredWorldString();
@@ -1473,6 +1483,21 @@ class TownyHook {
 			for (final Player online : Remain.getOnlinePlayers())
 				if (playersTown.equals(getTownName(online)))
 					recipients.add(online);
+
+		return recipients;
+	}
+
+	Collection<? extends Player> getAllyPlayersOnline(final Player pl) {
+		final List<Player> recipients = new ArrayList<>();
+		final Resident resident = getResident(pl);
+
+		if (resident != null)
+			for (final Player online : Remain.getOnlinePlayers()) {
+				final Resident otherResident = getResident(online);
+
+				if (otherResident != null && otherResident.isAlliedWith(resident))
+					recipients.add(online);
+			}
 
 		return recipients;
 	}
@@ -1561,7 +1586,7 @@ class TownyHook {
 		}
 	}
 
-	private Resident getResident(final Player player) {
+	Resident getResident(final Player player) {
 		try {
 			return TownyUniverse.getInstance().getResident(player.getName());
 
@@ -1576,14 +1601,14 @@ class ProtocolLibHook {
 	private final ProtocolManager manager;
 
 	ProtocolLibHook() {
-		manager = ProtocolLibrary.getProtocolManager();
+		this.manager = ProtocolLibrary.getProtocolManager();
 	}
 
 	final void addPacketListener(final Object listener) {
 		Valid.checkBoolean(listener instanceof PacketListener, "Listener must extend or implements PacketListener or PacketAdapter");
 
 		try {
-			manager.addPacketListener((PacketListener) listener);
+			this.manager.addPacketListener((PacketListener) listener);
 
 		} catch (final Throwable t) {
 			Common.error(t, "Failed to register ProtocolLib packet listener! Ensure you have the latest ProtocolLib. If you reloaded, try a fresh startup (some ProtocolLib esp. for 1.8.8 fails on reload).");
@@ -1591,7 +1616,7 @@ class ProtocolLibHook {
 	}
 
 	final void removePacketListeners(final Plugin plugin) {
-		manager.removePacketListeners(plugin);
+		this.manager.removePacketListeners(plugin);
 	}
 
 	final void sendPacket(final PacketContainer packet) {
@@ -1604,7 +1629,7 @@ class ProtocolLibHook {
 		Valid.checkBoolean(packet instanceof PacketContainer, "Packet must be instance of PacketContainer from ProtocolLib");
 
 		try {
-			manager.sendServerPacket(player, (PacketContainer) packet);
+			this.manager.sendServerPacket(player, (PacketContainer) packet);
 
 		} catch (final InvocationTargetException e) {
 			Common.error(e, "Failed to send " + ((PacketContainer) packet).getType() + " packet to " + player.getName());
@@ -1637,21 +1662,21 @@ class VaultHook {
 		final RegisteredServiceProvider<Permission> permProvider = Bukkit.getServicesManager().getRegistration(Permission.class);
 
 		if (economyProvider != null)
-			economy = economyProvider.getProvider();
+			this.economy = economyProvider.getProvider();
 
 		if (chatProvider != null)
-			chat = chatProvider.getProvider();
+			this.chat = chatProvider.getProvider();
 
 		if (permProvider != null)
-			permissions = permProvider.getProvider();
+			this.permissions = permProvider.getProvider();
 	}
 
 	boolean isChatIntegrated() {
-		return chat != null;
+		return this.chat != null;
 	}
 
 	boolean isEconomyIntegrated() {
-		return economy != null;
+		return this.economy != null;
 	}
 
 	// ------------------------------------------------------------------------------
@@ -1659,25 +1684,25 @@ class VaultHook {
 	// ------------------------------------------------------------------------------
 
 	String getCurrencyNameSG() {
-		return economy != null ? Common.getOrEmpty(economy.currencyNameSingular()) : "Money";
+		return this.economy != null ? Common.getOrEmpty(this.economy.currencyNameSingular()) : "Money";
 	}
 
 	String getCurrencyNamePL() {
-		return economy != null ? Common.getOrEmpty(economy.currencyNamePlural()) : "Money";
+		return this.economy != null ? Common.getOrEmpty(this.economy.currencyNamePlural()) : "Money";
 	}
 
 	double getBalance(final Player player) {
-		return economy != null ? economy.getBalance(player) : -1;
+		return this.economy != null ? this.economy.getBalance(player) : -1;
 	}
 
 	void withdraw(final Player player, final double amount) {
-		if (economy != null)
-			economy.withdrawPlayer(player.getName(), amount);
+		if (this.economy != null)
+			this.economy.withdrawPlayer(player.getName(), amount);
 	}
 
 	void deposit(final Player player, final double amount) {
-		if (economy != null)
-			economy.depositPlayer(player.getName(), amount);
+		if (this.economy != null)
+			this.economy.depositPlayer(player.getName(), amount);
 	}
 
 	// ------------------------------------------------------------------------------
@@ -1686,7 +1711,7 @@ class VaultHook {
 
 	Boolean hasPerm(@NonNull final OfflinePlayer player, final String perm) {
 		try {
-			return permissions != null ? perm != null ? permissions.playerHas((String) null, player, perm) : true : null;
+			return this.permissions != null ? perm != null ? this.permissions.playerHas((String) null, player, perm) : true : null;
 
 		} catch (final Throwable t) {
 			Common.logTimed(900,
@@ -1699,15 +1724,15 @@ class VaultHook {
 	}
 
 	Boolean hasPerm(@NonNull final String player, final String perm) {
-		return permissions != null ? perm != null ? permissions.has((String) null, player, perm) : true : null;
+		return this.permissions != null ? perm != null ? this.permissions.has((String) null, player, perm) : true : null;
 	}
 
 	Boolean hasPerm(@NonNull final String world, @NonNull final String player, final String perm) {
-		return permissions != null ? perm != null ? permissions.has(world, player, perm) : true : null;
+		return this.permissions != null ? perm != null ? this.permissions.has(world, player, perm) : true : null;
 	}
 
 	String getPrimaryGroup(final Player player) {
-		return permissions != null ? permissions.getPrimaryGroup(player) : "";
+		return this.permissions != null ? this.permissions.getPrimaryGroup(player) : "";
 	}
 
 	// ------------------------------------------------------------------------------
@@ -1727,11 +1752,11 @@ class VaultHook {
 	}
 
 	private String lookupVault(final Player player, final VaultPart vaultPart) {
-		if (chat == null)
+		if (this.chat == null)
 			return "";
 
-		final String[] groups = chat.getPlayerGroups(player);
-		String fallback = vaultPart == VaultPart.PREFIX ? chat.getPlayerPrefix(player) : vaultPart == VaultPart.SUFFIX ? chat.getPlayerSuffix(player) : groups != null && groups.length > 0 ? groups[0] : "";
+		final String[] groups = this.chat.getPlayerGroups(player);
+		String fallback = vaultPart == VaultPart.PREFIX ? this.chat.getPlayerPrefix(player) : vaultPart == VaultPart.SUFFIX ? this.chat.getPlayerSuffix(player) : groups != null && groups.length > 0 ? groups[0] : "";
 
 		if (fallback == null)
 			fallback = "";
@@ -1746,7 +1771,7 @@ class VaultHook {
 
 		if (groups != null)
 			for (final String group : groups) {
-				final String part = vaultPart == VaultPart.PREFIX ? chat.getGroupPrefix(player.getWorld(), group) : vaultPart == VaultPart.SUFFIX ? chat.getGroupSuffix(player.getWorld(), group) : group;
+				final String part = vaultPart == VaultPart.PREFIX ? this.chat.getGroupPrefix(player.getWorld(), group) : vaultPart == VaultPart.SUFFIX ? this.chat.getGroupSuffix(player.getWorld(), group) : group;
 
 				if (part != null && !part.isEmpty() && !list.contains(part))
 					list.add(part);
@@ -2136,7 +2161,7 @@ class WorldEditHook {
 		} catch (final ClassNotFoundException e) {
 		}
 
-		legacy = !ok;
+		this.legacy = !ok;
 	}
 }
 
@@ -2147,7 +2172,7 @@ class WorldGuardHook {
 	public WorldGuardHook(final WorldEditHook we) {
 		final Plugin worldGuard = Bukkit.getPluginManager().getPlugin("WorldGuard");
 
-		legacy = !worldGuard.getDescription().getVersion().startsWith("7") || we != null && we.legacy;
+		this.legacy = !worldGuard.getDescription().getVersion().startsWith("7") || we != null && we.legacy;
 	}
 
 	public List<String> getRegionsAt(final Location loc) {
@@ -2166,7 +2191,7 @@ class WorldGuardHook {
 	public Region getRegion(final String name) {
 		for (final World world : Bukkit.getWorlds()) {
 			final Object regionManager = getRegionManager(world);
-			if (legacy)
+			if (this.legacy)
 				try {
 
 					final Map<?, ?> regionMap = (Map<?, ?>) regionManager.getClass().getMethod("getRegions").invoke(regionManager);
@@ -2226,7 +2251,7 @@ class WorldGuardHook {
 
 		for (final World w : Bukkit.getWorlds()) {
 			final Object rm = getRegionManager(w);
-			if (legacy)
+			if (this.legacy)
 				try {
 					final Map<?, ?> regionMap = (Map<?, ?>) rm.getClass().getMethod("getRegions").invoke(rm);
 					Method getId = null;
@@ -2265,7 +2290,7 @@ class WorldGuardHook {
 	private Iterable<ProtectedRegion> getApplicableRegions(final Location loc) {
 		final Object rm = getRegionManager(loc.getWorld());
 
-		if (legacy)
+		if (this.legacy)
 			try {
 				return (Iterable<ProtectedRegion>) rm.getClass().getMethod("getApplicableRegions", Location.class).invoke(rm, loc);
 
@@ -2280,7 +2305,7 @@ class WorldGuardHook {
 	}
 
 	private Object getRegionManager(final World w) {
-		if (legacy)
+		if (this.legacy)
 			try {
 				return Class.forName("com.sk89q.worldguard.bukkit.WGBukkit").getMethod("getRegionManager", World.class).invoke(null, w);
 
@@ -2328,7 +2353,7 @@ class PlotSquaredHook {
 	List<Player> getPlotPlayers(final Player player) {
 		final List<Player> players = new ArrayList<>();
 
-		final Class<?> plotPlayerClass = ReflectionUtil.lookupClass((legacy ? "com.intellectualcrafters.plot.object" : "com.plotsquared.core.player") + ".PlotPlayer");
+		final Class<?> plotPlayerClass = ReflectionUtil.lookupClass((this.legacy ? "com.intellectualcrafters.plot.object" : "com.plotsquared.core.player") + ".PlotPlayer");
 		Method wrap;
 
 		try {
@@ -2539,8 +2564,8 @@ class ItemsAdderHook {
 
 	ItemsAdderHook() {
 		this.itemsAdder = ReflectionUtil.lookupClass("dev.lone.itemsadder.api.FontImages.FontImageWrapper");
-		this.replaceFontImagesMethod = ReflectionUtil.getDeclaredMethod(itemsAdder, "replaceFontImages", Player.class, String.class);
-		this.replaceFontImagesMethodNoPlayer = ReflectionUtil.getDeclaredMethod(itemsAdder, "replaceFontImages", String.class);
+		this.replaceFontImagesMethod = ReflectionUtil.getDeclaredMethod(this.itemsAdder, "replaceFontImages", Player.class, String.class);
+		this.replaceFontImagesMethodNoPlayer = ReflectionUtil.getDeclaredMethod(this.itemsAdder, "replaceFontImages", String.class);
 	}
 
 	/*
@@ -2548,8 +2573,8 @@ class ItemsAdderHook {
 	 */
 	String replaceFontImages(@Nullable final Player player, final String message) {
 		if (player == null)
-			return ReflectionUtil.invokeStatic(replaceFontImagesMethodNoPlayer, message);
+			return ReflectionUtil.invokeStatic(this.replaceFontImagesMethodNoPlayer, message);
 
-		return ReflectionUtil.invokeStatic(replaceFontImagesMethod, player, message);
+		return ReflectionUtil.invokeStatic(this.replaceFontImagesMethod, player, message);
 	}
 }
