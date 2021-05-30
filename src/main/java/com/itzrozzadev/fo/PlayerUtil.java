@@ -461,15 +461,38 @@ public final class PlayerUtil {
 		return isVanished(player);
 	}
 
+	public static boolean isVanished(final Player player) {
+		if (HookManager.isVanished(player))
+			return true;
+		return isVanishedMeta(player);
+	}
+
+	/**
+	 * Return true if the player is vanished. We check for Essentials vanish and also "vanished"
+	 * metadata value which is supported by most plugins
+	 *
+	 * @param player
+	 * @return
+	 */
+	public static boolean isVanishedMeta(final Player player) {
+
+		if (player.hasMetadata("vanished"))
+			for (final MetadataValue meta : player.getMetadata("vanished"))
+				if (meta.asBoolean())
+					return true;
+
+		return false;
+	}
+
 	/**
 	 * Vanish a player
 	 *
 	 * @param vanishingPlayer - Player being vanished
 	 */
 	public static void vanishPlayer(final Player vanishingPlayer) {
-		for (final Player onlinePlayer : Remain.getOnlinePlayers()) {
+		forEachOnlinePlayer((onlinePlayer) -> {
 			onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
-		}
+		});
 	}
 
 	/**
@@ -479,11 +502,10 @@ public final class PlayerUtil {
 	 * @param permission      - Permission to see vanished players
 	 */
 	public static void vanishPlayer(final Player vanishingPlayer, final String permission) {
-		for (final Player onlinePlayer : Remain.getOnlinePlayers()) {
-			if (onlinePlayer.hasPermission(permission))
-				return;
-			onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
-		}
+		forEachOnlinePlayer((onlinePlayer) -> {
+			if (!onlinePlayer.hasPermission(permission))
+				onlinePlayer.hidePlayer(SimplePlugin.getInstance(), vanishingPlayer);
+		});
 	}
 
 	/**
@@ -517,28 +539,6 @@ public final class PlayerUtil {
 		CompMetadata.addTempMetadata(vanishedPlayer, "vanished", String.valueOf(false));
 	}
 
-	/**
-	 * Return true if the player is vanished. We check for Essentials vanish and also "vanished"
-	 * metadata value which is supported by most plugins
-	 *
-	 * @param player
-	 * @return
-	 */
-	public static boolean isVanished(final Player player) {
-		if (HookManager.isVanished(player))
-			return true;
-		return isVanishedMeta(player);
-	}
-
-	public static boolean isVanishedMeta(final Player player) {
-
-		if (player.hasMetadata("vanished"))
-			for (final MetadataValue meta : player.getMetadata("vanished"))
-				if (meta.asBoolean())
-					return true;
-
-		return false;
-	}
 
 	// ------------------------------------------------------------------------------------------------------------
 	// Nicks
