@@ -1333,55 +1333,56 @@ public final class Remain {
 	 */
 	@Deprecated
 	public static void updateInventoryTitle(final Player player, String title) {
-		try {
-			if (MinecraftVersion.olderThan(V.v1_9) && title.length() > 32)
-				title = title.substring(0, 32);
+		if (title != null)
+			try {
+				if (MinecraftVersion.olderThan(V.v1_9) && title.length() > 32)
+					title = title.substring(0, 32);
 
-			final Object entityPlayer = player.getClass().getMethod("getHandle").invoke(player);
+				final Object entityPlayer = player.getClass().getMethod("getHandle").invoke(player);
 
-			final Object activeContainer = entityPlayer.getClass().getField("activeContainer").get(entityPlayer);
-			final Object windowId = activeContainer.getClass().getField("windowId").get(activeContainer);
+				final Object activeContainer = entityPlayer.getClass().getField("activeContainer").get(entityPlayer);
+				final Object windowId = activeContainer.getClass().getField("windowId").get(activeContainer);
 
-			final Object packet;
+				final Object packet;
 
-			if (MinecraftVersion.atLeast(V.v1_8)) {
-				final Constructor<?> chatMessageConst = getNMSClass("ChatMessage").getConstructor(String.class, Object[].class);
-				final Object chatMessage = chatMessageConst.newInstance(ChatColor.translateAlternateColorCodes('&', title), new Object[0]);
+				if (MinecraftVersion.atLeast(V.v1_8)) {
+					final Constructor<?> chatMessageConst = getNMSClass("ChatMessage").getConstructor(String.class, Object[].class);
+					final Object chatMessage = chatMessageConst.newInstance(ChatColor.translateAlternateColorCodes('&', title), new Object[0]);
 
-				if (MinecraftVersion.newerThan(V.v1_13)) {
-					final int inventorySize = player.getOpenInventory().getTopInventory().getSize() / 9;
+					if (MinecraftVersion.newerThan(V.v1_13)) {
+						final int inventorySize = player.getOpenInventory().getTopInventory().getSize() / 9;
 
-					if (inventorySize < 1 || inventorySize > 6) {
-						Common.log("Cannot update title for " + player.getName() + " as their inventory has non typical size: " + inventorySize + " rows");
+						if (inventorySize < 1 || inventorySize > 6) {
+							Common.log("Cannot update title for " + player.getName() + " as their inventory has non typical size: " + inventorySize + " rows");
 
-						return;
+							return;
+						}
+
+						final Class<?> containersClass = getNMSClass("Containers");
+						final Constructor<?> packetConst = getNMSClass("PacketPlayOutOpenWindow").getConstructor(/*windowID*/int.class, /*containers*/containersClass, /*msg*/getNMSClass("IChatBaseComponent"));
+						final Object container = containersClass.getField("GENERIC_9X" + inventorySize).get(null);
+
+						packet = packetConst.newInstance(windowId, container, chatMessage);
+
+					} else {
+						final Constructor<?> packetConst = getNMSClass("PacketPlayOutOpenWindow").getConstructor(int.class, String.class, getNMSClass("IChatBaseComponent"), int.class);
+
+						packet = packetConst.newInstance(windowId, "minecraft:chest", chatMessage, player.getOpenInventory().getTopInventory().getSize());
 					}
-
-					final Class<?> containersClass = getNMSClass("Containers");
-					final Constructor<?> packetConst = getNMSClass("PacketPlayOutOpenWindow").getConstructor(/*windowID*/int.class, /*containers*/containersClass, /*msg*/getNMSClass("IChatBaseComponent"));
-					final Object container = containersClass.getField("GENERIC_9X" + inventorySize).get(null);
-
-					packet = packetConst.newInstance(windowId, container, chatMessage);
-
 				} else {
-					final Constructor<?> packetConst = getNMSClass("PacketPlayOutOpenWindow").getConstructor(int.class, String.class, getNMSClass("IChatBaseComponent"), int.class);
+					final Constructor<?> openWindow = ReflectionUtil.getConstructor(
+							getNMSClass(MinecraftVersion.atLeast(V.v1_7) ? "PacketPlayOutOpenWindow" : "Packet100OpenWindow"), int.class, int.class, String.class, int.class, boolean.class);
 
-					packet = packetConst.newInstance(windowId, "minecraft:chest", chatMessage, player.getOpenInventory().getTopInventory().getSize());
+					packet = ReflectionUtil.instantiate(openWindow, windowId, 0, ChatColor.translateAlternateColorCodes('&', title), player.getOpenInventory().getTopInventory().getSize(), true);
 				}
-			} else {
-				final Constructor<?> openWindow = ReflectionUtil.getConstructor(
-						getNMSClass(MinecraftVersion.atLeast(V.v1_7) ? "PacketPlayOutOpenWindow" : "Packet100OpenWindow"), int.class, int.class, String.class, int.class, boolean.class);
 
-				packet = ReflectionUtil.instantiate(openWindow, windowId, 0, ChatColor.translateAlternateColorCodes('&', title), player.getOpenInventory().getTopInventory().getSize(), true);
+				sendPacket(player, packet);
+
+				entityPlayer.getClass().getMethod("updateInventory", getNMSClass("Container")).invoke(entityPlayer, activeContainer);
+
+			} catch (final ReflectiveOperationException ex) {
+				Common.error(ex, "Error updating " + player.getName() + " inventory title to '" + title + "'");
 			}
-
-			sendPacket(player, packet);
-
-			entityPlayer.getClass().getMethod("updateInventory", getNMSClass("Container")).invoke(entityPlayer, activeContainer);
-
-		} catch (final ReflectiveOperationException ex) {
-			Common.error(ex, "Error updating " + player.getName() + " inventory title to '" + title + "'");
-		}
 	}
 
 	/**
