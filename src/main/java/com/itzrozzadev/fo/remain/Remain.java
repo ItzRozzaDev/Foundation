@@ -1335,6 +1335,7 @@ public final class Remain {
 	public static void updateInventoryTitle(final Player player, String title) {
 		if (title != null)
 			try {
+				title = "&0" + title;
 				if (MinecraftVersion.olderThan(V.v1_9) && title.length() > 32)
 					title = title.substring(0, 32);
 

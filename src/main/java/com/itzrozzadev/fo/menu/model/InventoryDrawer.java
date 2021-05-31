@@ -140,7 +140,7 @@ public final class InventoryDrawer {
 		// Before opening make sure we close his old inventory if exist
 		if (player.getOpenInventory() != null && menu != null) {
 			player.getOpenInventory().getTopInventory().setContents(inv.getContents());
-			PlayerUtil.updateInventoryTitle(player, menu.getTitle());
+			PlayerUtil.updateInventoryTitle(player, this.title);
 			player.updateInventory();
 			return;
 		}
