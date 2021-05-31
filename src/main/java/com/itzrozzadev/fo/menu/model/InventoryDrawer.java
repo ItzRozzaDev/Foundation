@@ -138,7 +138,8 @@ public final class InventoryDrawer {
 		final Menu menu = Menu.getMenu(player);
 		// Before opening make sure we close his old inventory if exist
 		if (player.getOpenInventory() != null && menu != null) {
-			if (menu.getSize() > getSize()) {
+			//Check for a new bigger menu - This will open a new menu instead of setting the contents of the current one
+			if (menu.getSize() < getSize()) {
 				player.openInventory(inv);
 			} else {
 				player.getOpenInventory().getTopInventory().setContents(inv.getContents());
