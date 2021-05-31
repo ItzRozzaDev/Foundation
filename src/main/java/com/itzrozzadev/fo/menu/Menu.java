@@ -380,10 +380,10 @@ public abstract class Menu {
 
 		// Set items defined by classes upstream
 		for (int i = 0; i < drawer.getSize(); i++) {
-			final ItemStack item = makeMenuItem(getItemAt(i));
+			final ItemStack item = getItemAt(i);
 
 			if (item != null && !drawer.isSet(i))
-				drawer.setItem(i, item);
+				drawer.setItem(i, makeMenuItem(item));
 		}
 
 		// Allow last minute modifications
