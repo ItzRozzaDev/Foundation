@@ -46,6 +46,7 @@ public final class CompMetadata {
 	 * The tag delimiter
 	 */
 	private final static String DELIMITER = "%-%";
+	private final static String METADATA_MENU = "MENU";
 
 	// Static access
 	private CompMetadata() {
@@ -92,6 +93,14 @@ public final class CompMetadata {
 			tag.removeKey(key);
 			item.setItemMeta(nbt.getItem().getItemMeta());
 		}
+	}
+
+	public static ItemStack makeMenuItem(final ItemStack item) {
+		return setMetadataItem(item, METADATA_MENU, METADATA_MENU);
+	}
+
+	public static boolean isItemMenu(final ItemStack itemStack) {
+		return hasMetadata(itemStack, METADATA_MENU);
 	}
 
 

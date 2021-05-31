@@ -13,6 +13,7 @@ import com.itzrozzadev.fo.menu.model.MenuClickLocation;
 import com.itzrozzadev.fo.model.SimpleSound;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
 import com.itzrozzadev.fo.remain.CompMaterial;
+import com.itzrozzadev.fo.remain.CompMetadata;
 import com.itzrozzadev.fo.remain.CompSound;
 import com.itzrozzadev.fo.settings.SimpleLocalization;
 import lombok.AccessLevel;
@@ -231,14 +232,14 @@ public abstract class Menu {
 	 * Scans the menu class this menu extends and registers buttons
 	 */
 	protected final void registerButtons() {
-		registeredButtons.clear();
+		this.registeredButtons.clear();
 
 		// Register buttons explicitly given
 		{
 			final List<Button> buttons = getButtonsToAutoRegister();
 
 			if (buttons != null)
-				registeredButtons.addAll(buttons);
+				this.registeredButtons.addAll(buttons);
 		}
 
 		// Register buttons declared as fields
@@ -262,14 +263,14 @@ public abstract class Menu {
 			final Button button = (Button) ReflectionUtil.getFieldContent(field, this);
 
 			Valid.checkNotNull(button, "Null button field named " + field.getName() + " in " + this);
-			registeredButtons.add(button);
+			this.registeredButtons.add(button);
 
 		} else if (Button[].class.isAssignableFrom(type)) {
 			Valid.checkBoolean(Modifier.isFinal(field.getModifiers()), "Report / Button[] field must be final: " + field);
 			final Button[] buttons = (Button[]) ReflectionUtil.getFieldContent(field, this);
 
 			Valid.checkBoolean(buttons != null && buttons.length > 0, "Null " + field.getName() + "[] in " + this);
-			registeredButtons.addAll(Arrays.asList(buttons));
+			this.registeredButtons.addAll(Arrays.asList(buttons));
 		}
 	}
 
@@ -279,10 +280,9 @@ public abstract class Menu {
 	 * This method will only register them once until the server is reset
 	 */
 	private void registerButtonsIfHasnt() {
-		if (!buttonsRegistered) {
+		if (!this.buttonsRegistered) {
 			registerButtons();
-
-			buttonsRegistered = true;
+			this.buttonsRegistered = true;
 		}
 	}
 
@@ -309,7 +309,7 @@ public abstract class Menu {
 		registerButtonsIfHasnt();
 
 		if (fromItem != null)
-			for (final Button button : registeredButtons) {
+			for (final Button button : this.registeredButtons) {
 				Valid.checkNotNull(button, "Menu button is null at " + getClass().getSimpleName());
 				Valid.checkNotNull(button.getItem(), "Menu " + getTitle() + " contained button " + button + " with empty item!");
 
@@ -366,21 +366,21 @@ public abstract class Menu {
 	}
 
 	public final void displayTo(final Player player, final boolean ignoreConversing) {
-		Valid.checkNotNull(size, "Size not set in " + this + " (call setSize in your constructor)");
-		Valid.checkNotNull(title, "Title not set in " + this + " (call setTitle in your constructor)");
+		Valid.checkNotNull(this.size, "Size not set in " + this + " (call setSize in your constructor)");
+		Valid.checkNotNull(this.title, "Title not set in " + this + " (call setTitle in your constructor)");
 
-		viewer = player;
+		this.viewer = player;
 		registerButtonsIfHasnt();
 
 		// Draw the menu
-		final InventoryDrawer drawer = InventoryDrawer.of(size, title);
+		final InventoryDrawer drawer = InventoryDrawer.of(this.size, this.title);
 
 		// Compile bottom bar
 		compileBottomBar0().forEach(drawer::setItem);
 
 		// Set items defined by classes upstream
 		for (int i = 0; i < drawer.getSize(); i++) {
-			final ItemStack item = getItemAt(i);
+			final ItemStack item = makeMenuItem(getItemAt(i));
 
 			if (item != null && !drawer.isSet(i))
 				drawer.setItem(i, item);
@@ -422,6 +422,10 @@ public abstract class Menu {
 		});
 	}
 
+	private ItemStack makeMenuItem(final ItemStack itemStack) {
+		return CompMetadata.makeMenuItem(itemStack);
+	}
+
 	/**
 	 * Sets all empty slots to light gray pane or adds a slot number to existing
 	 * items lores if {@link #slotNumbersVisible} is true
@@ -429,7 +433,7 @@ public abstract class Menu {
 	 * @param drawer
 	 */
 	private void debugSlotNumbers(final InventoryDrawer drawer) {
-		if (slotNumbersVisible)
+		if (this.slotNumbersVisible)
 			for (int slot = 0; slot < drawer.getSize(); slot++) {
 				final ItemStack item = drawer.getItem(slot);
 				if (item == null)
@@ -477,7 +481,7 @@ public abstract class Menu {
 		final Inventory inv = getViewer().getOpenInventory().getTopInventory();
 		Valid.checkBoolean(inv.getType() == InventoryType.CHEST, getViewer().getName() + "'s inventory closed in the meanwhile (now == " + inv.getType() + ").");
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size; i++) {
 			final ItemStack item = getItemAt(i);
 
 			Valid.checkBoolean(i < inv.getSize(), "Item (" + (item != null ? item.getType() : "null") + ") position (" + i + ") > inv size (" + inv.getSize() + ")");
@@ -490,7 +494,7 @@ public abstract class Menu {
 
 	protected final void redraw(final Inventory inv) {
 		Valid.checkBoolean(inv.getType() == InventoryType.CHEST, getViewer().getName() + "'s inventory closed in the meanwhile (now == " + inv.getType() + ").");
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size; i++) {
 			final ItemStack item = inv.getItem(i);
 
 			Valid.checkBoolean(i < inv.getSize(), "Item (" + (item != null ? item.getType() : "null") + ") position (" + i + ") > inv size (" + inv.getSize() + ")");
@@ -512,8 +516,8 @@ public abstract class Menu {
 		if (addInfoButton() && getInfo() != null)
 			items.put(getInfoButtonPosition(), Button.makeInfo(getInfo()).getItem());
 
-		if (addReturnButton() && !(returnButton instanceof DummyButton))
-			items.put(getReturnButtonPosition(), returnButton.getItem());
+		if (addReturnButton() && !(this.returnButton instanceof DummyButton))
+			items.put(getReturnButtonPosition(), this.returnButton.getItem());
 
 		return items;
 	}
@@ -535,7 +539,7 @@ public abstract class Menu {
 		final Inventory inv = getViewer().getOpenInventory().getTopInventory();
 		Valid.checkBoolean(inv.getType() == InventoryType.CHEST, getViewer().getName() + "'s inventory closed in the meanwhile (now == " + inv.getType() + ").");
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size; i++) {
 			final ItemStack item = inv.getItem(i);
 			if (slot == i) {
 				if (item != null)
@@ -555,7 +559,7 @@ public abstract class Menu {
 		final Inventory inv = getViewer().getOpenInventory().getTopInventory();
 		Valid.checkBoolean(inv.getType() == InventoryType.CHEST, getViewer().getName() + "'s inventory closed in the meanwhile (now == " + inv.getType() + ").");
 
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < this.size; i++) {
 			final ItemStack item = inv.getItem(i);
 			if (slot == i) {
 				if (item != null) {
@@ -665,7 +669,7 @@ public abstract class Menu {
 	 * @return the slot which info buttons is located on
 	 */
 	protected int getInfoButtonPosition() {
-		return size - 9;
+		return this.size - 9;
 	}
 
 	/**
@@ -693,7 +697,7 @@ public abstract class Menu {
 	 * @return the slot which return buttons is located on
 	 */
 	protected int getReturnButtonPosition() {
-		return size - 1;
+		return this.size - 1;
 	}
 
 	/**
@@ -706,9 +710,9 @@ public abstract class Menu {
 	 * @return the estimated center slot
 	 */
 	protected final int getCenterSlot() {
-		final int pos = size / 2;
+		final int pos = this.size / 2;
 
-		return size % 2 == 1 ? pos : pos - 5;
+		return this.size % 2 == 1 ? pos : pos - 5;
 	}
 
 	/**
@@ -734,7 +738,7 @@ public abstract class Menu {
 	 * @return the menu title
 	 */
 	public final String getTitle() {
-		return title;
+		return this.title;
 	}
 
 	/**
@@ -753,7 +757,7 @@ public abstract class Menu {
 	 * @return
 	 */
 	public final Menu getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	/**
@@ -762,7 +766,7 @@ public abstract class Menu {
 	 * @return
 	 */
 	public final Integer getSize() {
-		return size;
+		return this.size;
 	}
 
 	/**
@@ -794,7 +798,7 @@ public abstract class Menu {
 	 * @return the viewer of this instance, or null
 	 */
 	protected final Player getViewer() {
-		return viewer;
+		return this.viewer;
 	}
 
 	/**
@@ -812,9 +816,9 @@ public abstract class Menu {
 	 * @return
 	 */
 	protected final Inventory getInventory() {
-		Valid.checkNotNull(viewer, "Cannot get inventory when there is no viewer!");
+		Valid.checkNotNull(this.viewer, "Cannot get inventory when there is no viewer!");
 
-		final Inventory topInventory = viewer.getOpenInventory().getTopInventory();
+		final Inventory topInventory = this.viewer.getOpenInventory().getTopInventory();
 		Valid.checkNotNull(topInventory, "Top inventory is null!");
 
 		return topInventory;

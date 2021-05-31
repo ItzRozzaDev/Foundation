@@ -4,15 +4,19 @@ import com.itzrozzadev.fo.*;
 import com.itzrozzadev.fo.MinecraftVersion.V;
 import com.itzrozzadev.fo.constants.FoPermissions;
 import com.itzrozzadev.fo.model.*;
+import com.itzrozzadev.fo.remain.CompMaterial;
+import com.itzrozzadev.fo.remain.CompMetadata;
 import com.itzrozzadev.fo.settings.SimpleLocalization;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServiceRegisterEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 import java.util.Map;
@@ -153,4 +157,13 @@ final class FoundationListener implements Listener {
 		// Prevent "Unknown command message"
 		event.setCancelled(true);
 	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onInteract(final PlayerInteractEvent event) {
+		final Player player = event.getPlayer();
+		final ItemStack itemStack = player.getItemInHand();
+		if (itemStack.getType() != CompMaterial.AIR.getMaterial())
+			event.setCancelled(CompMetadata.isItemMenu(itemStack));
+	}
+
 }

@@ -51,7 +51,7 @@ public abstract class Button {
 	public abstract void onClickedInMenu(Player player, Menu menu, ClickType click);
 
 	/**
-	 * The item representing this button. Tip: Use {@link ItemCreator} to create it.
+	 * The item representing this button. Use {@link ItemCreator} to create it.
 	 *
 	 * @return the item for this button
 	 */
