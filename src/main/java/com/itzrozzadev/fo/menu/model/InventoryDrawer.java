@@ -1,6 +1,7 @@
 package com.itzrozzadev.fo.menu.model;
 
 import com.itzrozzadev.fo.Common;
+import com.itzrozzadev.fo.PlayerUtil;
 import com.itzrozzadev.fo.menu.Menu;
 import com.itzrozzadev.fo.remain.CompMaterial;
 import lombok.Getter;
@@ -138,7 +139,7 @@ public final class InventoryDrawer {
 		// Before opening make sure we close his old inventory if exist
 		if (player.getOpenInventory() != null) {
 			player.getOpenInventory().getTopInventory().setContents(inv.getContents());
-			setTitle(Menu.getMenu(player).getTitle());
+			PlayerUtil.updateInventoryTitle(player, Menu.getMenu(player).getTitle());
 			player.updateInventory();
 			return;
 		}
