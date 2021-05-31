@@ -382,7 +382,7 @@ public abstract class Menu {
 		for (int i = 0; i < drawer.getSize(); i++) {
 			final ItemStack item = getItemAt(i);
 
-			if (item != null && !drawer.isSet(i))
+			if (item != null && item.getType() != CompMaterial.AIR.getMaterial() && !drawer.isSet(i))
 				drawer.setItem(i, makeMenuItem(item));
 		}
 
@@ -410,7 +410,6 @@ public abstract class Menu {
 		// Register previous menu if exists
 		{
 			final Menu previous = getMenu(player);
-
 			if (previous != null)
 				player.setMetadata(FoConstants.NBT.TAG_MENU_PREVIOUS, new FixedMetadataValue(SimplePlugin.getInstance(), previous));
 		}
