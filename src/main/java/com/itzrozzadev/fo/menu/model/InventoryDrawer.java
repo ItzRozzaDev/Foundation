@@ -1,6 +1,7 @@
 package com.itzrozzadev.fo.menu.model;
 
 import com.itzrozzadev.fo.Common;
+import com.itzrozzadev.fo.menu.Menu;
 import com.itzrozzadev.fo.remain.CompMaterial;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -136,11 +137,10 @@ public final class InventoryDrawer {
 		Common.log(String.valueOf(player.getOpenInventory()));
 		// Before opening make sure we close his old inventory if exist
 		if (player.getOpenInventory() != null) {
-			if (inv.getSize() == player.getOpenInventory().getTopInventory().getSize()) {
-				player.getOpenInventory().getTopInventory().setContents(inv.getContents());
-				player.updateInventory();
-				return;
-			}
+			player.getOpenInventory().getTopInventory().setContents(inv.getContents());
+			setTitle(Menu.getMenu(player).getTitle());
+			player.updateInventory();
+			return;
 		}
 		player.openInventory(inv);
 	}

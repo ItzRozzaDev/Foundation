@@ -158,12 +158,12 @@ final class FoundationListener implements Listener {
 		event.setCancelled(true);
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.NORMAL)
 	public void onInteract(final PlayerInteractEvent event) {
 		final Player player = event.getPlayer();
 		final ItemStack itemStack = player.getItemInHand();
-		if (itemStack.getType() != CompMaterial.AIR.getMaterial())
+		if (itemStack.getType() != CompMaterial.AIR.getMaterial()) {
 			event.setCancelled(CompMetadata.isItemMenu(itemStack));
+		}
 	}
-
 }
