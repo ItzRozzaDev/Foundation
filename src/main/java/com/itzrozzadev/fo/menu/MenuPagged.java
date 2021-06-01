@@ -195,7 +195,7 @@ public abstract class MenuPagged<T> extends Menu {
 	 *
 	 * @return
 	 */
-	public Button formPreviousButton() {
+	private Button formPreviousButton() {
 		return new Button() {
 			final boolean canGo = MenuPagged.this.currentPage > 1;
 
@@ -213,11 +213,19 @@ public abstract class MenuPagged<T> extends Menu {
 				final int previousPage = MenuPagged.this.currentPage - 1;
 
 				return ItemCreator
-						.of(this.canGo ? CompMaterial.LIME_DYE : CompMaterial.GRAY_DYE)
+						.of(this.canGo ? getHasPagesMaterial() : getNoPagesMaterial())
 						.name(previousPage == 0 ? SimpleLocalization.Menu.PAGE_FIRST : SimpleLocalization.Menu.PAGE_PREVIOUS.replace("{page}", String.valueOf(previousPage)))
 						.build().make();
 			}
 		};
+	}
+
+	protected CompMaterial getHasPagesMaterial() {
+		return CompMaterial.LIME_DYE;
+	}
+
+	protected CompMaterial getNoPagesMaterial() {
+		return CompMaterial.LIME_DYE;
 	}
 
 	/**
@@ -226,7 +234,7 @@ public abstract class MenuPagged<T> extends Menu {
 	 *
 	 * @return
 	 */
-	public Button formNextButton() {
+	private Button formNextButton() {
 		return new Button() {
 			final boolean canGo = MenuPagged.this.currentPage < MenuPagged.this.pages.size();
 
@@ -243,7 +251,7 @@ public abstract class MenuPagged<T> extends Menu {
 				final boolean lastPage = MenuPagged.this.currentPage == MenuPagged.this.pages.size();
 
 				return ItemCreator
-						.of(this.canGo ? CompMaterial.LIME_DYE : CompMaterial.GRAY_DYE)
+						.of(this.canGo ? getHasPagesMaterial() : getNoPagesMaterial())
 						.name(lastPage ? SimpleLocalization.Menu.PAGE_LAST : SimpleLocalization.Menu.PAGE_NEXT.replace("{page}", String.valueOf(MenuPagged.this.currentPage + 1)))
 						.build().make();
 			}
