@@ -151,7 +151,7 @@ public abstract class MenuPagged<T> extends Menu {
 		setButtons();
 	}
 
-	private MenuPagged(final Integer pageSize, final int bottomBarSize, final Menu parent, final Iterable<T> pages, final boolean returnMakesNewInstance) {
+	public MenuPagged(final Integer pageSize, final int bottomBarSize, final Menu parent, final Iterable<T> pages, final boolean returnMakesNewInstance) {
 		super(parent, returnMakesNewInstance);
 		this.currentPage = 1;
 		this.pages = Common.fillPages(pageSize, pages);
