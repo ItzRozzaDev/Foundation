@@ -18,6 +18,7 @@ public final class SimpleCanceller implements ConversationCanceller {
 	 * The words that trigger the conversation cancellation
 	 */
 	private final List<String> cancelPhrases;
+	private final SimpleConversation conversation;
 
 	/**
 	 * Create a new convo canceler based off the given strings
@@ -25,9 +26,11 @@ public final class SimpleCanceller implements ConversationCanceller {
 	 *
 	 * @param cancelPhrases
 	 */
-	public SimpleCanceller(final String... cancelPhrases) {
-		this(Arrays.asList(cancelPhrases));
+	public SimpleCanceller(final SimpleConversation conversation, final String... cancelPhrases) {
+		this(conversation, Arrays.asList(cancelPhrases));
+
 	}
+
 
 	/**
 	 * Create a new convo canceler from the given lists
@@ -35,9 +38,9 @@ public final class SimpleCanceller implements ConversationCanceller {
 	 *
 	 * @param cancelPhrases
 	 */
-	public SimpleCanceller(final List<String> cancelPhrases) {
+	public SimpleCanceller(final SimpleConversation conversation, final List<String> cancelPhrases) {
 		Valid.checkBoolean(!cancelPhrases.isEmpty(), "Cancel phrases are empty for conversation cancel listener!");
-
+		this.conversation = conversation;
 		this.cancelPhrases = cancelPhrases;
 	}
 
@@ -52,7 +55,7 @@ public final class SimpleCanceller implements ConversationCanceller {
 	public boolean cancelBasedOnInput(final ConversationContext context, final String input) {
 		for (final String phrase : this.cancelPhrases)
 			if (input.equalsIgnoreCase(phrase)) {
-				onExit();
+				this.conversation.onExit();
 				return true;
 			}
 
@@ -61,10 +64,7 @@ public final class SimpleCanceller implements ConversationCanceller {
 
 	@Override
 	public ConversationCanceller clone() {
-		return new SimpleCanceller(this.cancelPhrases);
+		return new SimpleCanceller(this.conversation, this.cancelPhrases);
 	}
 
-	protected void onExit() {
-
-	}
 }
