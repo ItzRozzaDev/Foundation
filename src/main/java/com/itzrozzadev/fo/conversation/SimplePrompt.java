@@ -1,18 +1,12 @@
 package com.itzrozzadev.fo.conversation;
 
-import org.bukkit.conversations.Conversable;
-import org.bukkit.conversations.ConversationAbandonedEvent;
-import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationPrefix;
-import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.ValidatingPrompt;
-import org.bukkit.entity.Player;
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.menu.Menu;
 import com.itzrozzadev.fo.model.Variables;
-
 import lombok.SneakyThrows;
+import org.bukkit.conversations.*;
+import org.bukkit.entity.Player;
 
 /**
  * Represents one question for the player during a server conversation
@@ -110,9 +104,9 @@ public abstract class SimplePrompt extends ValidatingPrompt implements Cloneable
 	 * @param message
 	 */
 	protected final void tell(final String message) {
-		Valid.checkNotNull(player, "Cannot use tell() when player not yet set!");
+		Valid.checkNotNull(this.player, "Cannot use tell() when player not yet set!");
 
-		tell(player, message);
+		tell(this.player, message);
 	}
 
 	/**
@@ -199,9 +193,14 @@ public abstract class SimplePrompt extends ValidatingPrompt implements Cloneable
 
 				return prefix != null ? new SimplePrefix(prefix) : super.getPrefix();
 			}
+
+			@Override
+			protected void onExit() {
+				SimplePrompt.this.onExit();
+			}
 		};
 
-		if (openMenu) {
+		if (this.openMenu) {
 			final Menu menu = Menu.getMenu(player);
 
 			if (menu != null)
@@ -211,6 +210,10 @@ public abstract class SimplePrompt extends ValidatingPrompt implements Cloneable
 		conversation.start(player);
 
 		return conversation;
+	}
+
+	protected void onExit() {
+
 	}
 
 	@SneakyThrows
