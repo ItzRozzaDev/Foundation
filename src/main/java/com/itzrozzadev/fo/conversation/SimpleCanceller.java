@@ -1,12 +1,12 @@
 package com.itzrozzadev.fo.conversation;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.itzrozzadev.fo.Valid;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationCanceller;
 import org.bukkit.conversations.ConversationContext;
-import com.itzrozzadev.fo.Valid;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A simple conversation canceller
@@ -25,7 +25,7 @@ public final class SimpleCanceller implements ConversationCanceller {
 	 *
 	 * @param cancelPhrases
 	 */
-	public SimpleCanceller(String... cancelPhrases) {
+	public SimpleCanceller(final String... cancelPhrases) {
 		this(Arrays.asList(cancelPhrases));
 	}
 
@@ -35,30 +35,36 @@ public final class SimpleCanceller implements ConversationCanceller {
 	 *
 	 * @param cancelPhrases
 	 */
-	public SimpleCanceller(List<String> cancelPhrases) {
+	public SimpleCanceller(final List<String> cancelPhrases) {
 		Valid.checkBoolean(!cancelPhrases.isEmpty(), "Cancel phrases are empty for conversation cancel listener!");
 
 		this.cancelPhrases = cancelPhrases;
 	}
 
 	@Override
-	public void setConversation(Conversation conversation) {
+	public void setConversation(final Conversation conversation) {
 	}
 
 	/**
 	 * Listen to cancel phrases and exit if they equals
 	 */
 	@Override
-	public boolean cancelBasedOnInput(ConversationContext context, String input) {
-		for (final String phrase : cancelPhrases)
-			if (input.equalsIgnoreCase(phrase))
+	public boolean cancelBasedOnInput(final ConversationContext context, final String input) {
+		for (final String phrase : this.cancelPhrases)
+			if (input.equalsIgnoreCase(phrase)) {
+				onExit();
 				return true;
+			}
 
 		return false;
 	}
 
 	@Override
 	public ConversationCanceller clone() {
-		return new SimpleCanceller(cancelPhrases);
+		return new SimpleCanceller(this.cancelPhrases);
+	}
+
+	protected void onExit() {
+
 	}
 }
