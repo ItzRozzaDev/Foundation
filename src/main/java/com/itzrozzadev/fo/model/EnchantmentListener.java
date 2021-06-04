@@ -1,8 +1,9 @@
 package com.itzrozzadev.fo.model;
 
-import java.util.Map.Entry;
-import java.util.function.BiConsumer;
-
+import com.itzrozzadev.fo.EntityUtil;
+import com.itzrozzadev.fo.MinecraftVersion;
+import com.itzrozzadev.fo.MinecraftVersion.V;
+import com.itzrozzadev.fo.remain.Remain;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -15,20 +16,18 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
-import com.itzrozzadev.fo.EntityUtil;
-import com.itzrozzadev.fo.MinecraftVersion;
-import com.itzrozzadev.fo.MinecraftVersion.V;
-import com.itzrozzadev.fo.remain.Remain;
+
+import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 
 /**
  * Listens and executes events for {@link SimpleEnchantment}
- * <p>
  * Internal use only!
  */
 public final class EnchantmentListener implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onEntityDamage(EntityDamageByEntityEvent event) {
+	public void onEntityDamage(final EntityDamageByEntityEvent event) {
 		final Entity damager = event.getDamager();
 
 		if (damager instanceof LivingEntity)
@@ -36,17 +35,17 @@ public final class EnchantmentListener implements Listener {
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
-	public void onInteract(PlayerInteractEvent event) {
+	public void onInteract(final PlayerInteractEvent event) {
 		execute(event.getPlayer(), (enchant, level) -> enchant.onInteract(level, event));
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onBreakBlock(BlockBreakEvent event) {
+	public void onBreakBlock(final BlockBreakEvent event) {
 		execute(event.getPlayer(), (enchant, level) -> enchant.onBreakBlock(level, event));
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onShoot(ProjectileLaunchEvent event) {
+	public void onShoot(final ProjectileLaunchEvent event) {
 		try {
 			final ProjectileSource projectileSource = event.getEntity().getShooter();
 
@@ -62,7 +61,7 @@ public final class EnchantmentListener implements Listener {
 		}
 	}
 
-	private void execute(LivingEntity source, BiConsumer<SimpleEnchantment, Integer> executer) {
+	private void execute(final LivingEntity source, final BiConsumer<SimpleEnchantment, Integer> executer) {
 		try {
 			final ItemStack hand = source instanceof Player ? ((Player) source).getItemInHand() : source.getEquipment().getItemInHand();
 

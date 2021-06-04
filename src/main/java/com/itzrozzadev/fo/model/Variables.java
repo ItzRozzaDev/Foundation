@@ -31,7 +31,7 @@ public final class Variables {
 	/**
 	 * The pattern to find singular [syntax_name] variables
 	 */
-	public static final Pattern MESSAGE_PLACEHOLDER_PATTERN = Pattern.compile("[\\[]([^\\[\\]]+)[\\]]");
+	public static final Pattern MESSAGE_PLACEHOLDER_PATTERN = Pattern.compile("[\\[]([^\\[\\]]+)[]]");
 
 	/**
 	 * The pattern to find simple {} placeholders

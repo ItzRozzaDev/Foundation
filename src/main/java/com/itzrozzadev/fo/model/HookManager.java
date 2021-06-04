@@ -74,7 +74,6 @@ public final class HookManager {
 
 	private static AuthMeHook authMeHook;
 	private static BanManagerHook banManagerHook;
-	private static BossHook bossHook;
 	private static CitizensHook citizensHook;
 	private static DiscordSRVHook discordSRVHook;
 	private static EssentialsHook essentialsHook;
@@ -111,9 +110,6 @@ public final class HookManager {
 
 		if (Common.doesPluginExist("BanManager"))
 			banManagerHook = new BanManagerHook();
-
-		if (Common.doesPluginExist("Boss"))
-			bossHook = new BossHook();
 
 		if (Common.doesPluginExist("Citizens"))
 			citizensHook = new CitizensHook();
@@ -243,14 +239,6 @@ public final class HookManager {
 		return banManagerHook != null;
 	}
 
-	/**
-	 * Return if Boss plugin is detected
-	 *
-	 * @return
-	 */
-	public static boolean isBossLoaded() {
-		return bossHook != null;
-	}
 
 	/**
 	 * Is Citizens loaded?
@@ -494,16 +482,6 @@ public final class HookManager {
 	// Boss-related plugins
 	// ------------------------------------------------------------------------------------------------------------
 
-	/**
-	 * Returns the Boss name from the given entity, if Boss plugin is installed and
-	 * the given entity is a Boss, otherwise returns null.
-	 *
-	 * @param entity
-	 * @return
-	 */
-	public static String getBossName(final Entity entity) {
-		return isBossLoaded() ? bossHook.getBossName(entity) : null;
-	}
 
 	/**
 	 * Returns the name from the given entity, if MythicMobs plugin is installed and
@@ -2473,32 +2451,6 @@ class BanManagerHook {
 
 			return false;
 		}
-	}
-}
-
-class BossHook {
-
-	/*
-	 * Return the Boss name if the given player is a Boss or null
-	 */
-	String getBossName(final Entity entity) {
-		try {
-			final Class<?> api = ReflectionUtil.lookupClass("org.mineacademy.boss.api.BossAPI");
-			final Method getBoss = ReflectionUtil.getMethod(api, "getBoss", Entity.class);
-
-			final Object boss = ReflectionUtil.invoke(getBoss, null, entity);
-
-			if (boss != null) {
-				final Method getName = ReflectionUtil.getMethod(boss.getClass(), "getName");
-
-				return ReflectionUtil.invoke(getName, boss);
-			}
-
-		} catch (final Throwable t) {
-			Common.log("Unable to check if " + entity + " is a BOSS. Is the API hook outdated? Got: " + t);
-		}
-
-		return null;
 	}
 }
 

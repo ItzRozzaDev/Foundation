@@ -135,7 +135,7 @@ Server_Prefix: "[Server]"
 Console_Name: "Console"
 
 # -----------------------------------------------------------------------------------------------
-# A special message when users edit our data.db which they should not
+# A special message when users edit our FoConstants.DATA which they should not
 # -----------------------------------------------------------------------------------------------
 Data_Missing: "&c{name} lacks database information! Please only create {type} in-game! Skipping.."
 

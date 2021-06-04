@@ -8,7 +8,7 @@ import java.util.Objects;
  * An extension of {@link YamlConfig} useful when you want to separate
  * your settings classes but they all use the same file.
  * <p>
- * Example: CoreArena plugin uses classes and arenas, both save data in the data.db
+ * Example: CoreArena plugin uses classes and arenas, both save data in the FoConstants.DATA
  * file but have different section in that file.
  */
 public abstract class YamlSectionConfig extends YamlConfig {
@@ -84,8 +84,8 @@ public abstract class YamlSectionConfig extends YamlConfig {
 		if (getPathPrefix() != null && !getPathPrefix().isEmpty())
 			path += getPathPrefix() + ".";
 
-		if (localPathPrefix != null && !localPathPrefix.isEmpty())
-			path += localPathPrefix + ".";
+		if (this.localPathPrefix != null && !this.localPathPrefix.isEmpty())
+			path += this.localPathPrefix + ".";
 
 		path = path + myPath;
 

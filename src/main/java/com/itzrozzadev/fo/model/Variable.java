@@ -20,7 +20,7 @@ import java.util.function.Function;
 public final class Variable extends YamlConfig {
 
 	/**
-	 * Return the prototype file path for the given variable fiel name
+	 * Return the prototype file path for the given variable field name
 	 */
 	public static Function<String, String> PROTOTYPE_PATH = t -> NO_DEFAULT;
 
@@ -130,7 +130,7 @@ public final class Variable extends YamlConfig {
 	 */
 	@Override
 	protected boolean saveComments() {
-		return saveComments;
+		return this.saveComments;
 	}
 
 	// ----------------------------------------------------------------------------------

@@ -74,8 +74,7 @@ public final class JavaScriptExecutor {
 			if (Remain.getJavaVersion() >= 15)
 				warningMessage.addAll(Arrays.asList(
 						"",
-						"To fix this, install the NashornPlus",
-						"plugin from mineacademy.org/nashorn"));
+						"To fix this, install the NashornPlus"));
 			else
 				warningMessage.addAll(Arrays.asList(
 						"",

@@ -22,7 +22,7 @@ public final class FoConstants {
 		/**
 		 * The name of our settings file
 		 */
-		public static final String SETTINGS = "settings.yml";
+		public static final String SETTINGS = "config.yml";
 
 		/**
 		 * The error.log file created automatically to log errors to
@@ -35,56 +35,15 @@ public final class FoConstants {
 		public static final String DEBUG = "debug.log";
 
 		/**
-		 * The data.db file (uses YAML) for saving various data
+		 * The FoConstants.DATA file (uses YAML) for saving various data
 		 */
-		public static final String DATA = "data.db";
-
-		/**
-		 * Files related to the ChatControl plugin
-		 */
-		public static final class ChatControl {
-
-			/**
-			 * The command-spy.log file in logs/ folder
-			 */
-			public static final String COMMAND_SPY = "logs/command-spy.log";
-
-			/**
-			 * The chat log file in logs/ folder
-			 */
-			public static final String CHAT_LOG = "logs/chat.log";
-
-			/**
-			 * The admin log in log/s folder
-			 */
-			public static final String ADMIN_CHAT = "logs/admin-chat.log";
-
-			/**
-			 * The bungee chat log file in logs/ folder
-			 */
-			public static final String BUNGEE_CHAT = "logs/bungee-chat.log";
-
-			/**
-			 * The rules log file in logs/ folder
-			 */
-			public static final String RULES_LOG = "logs/rules.log";
-
-			/**
-			 * The console log file in logs/ folder
-			 */
-			public static final String CONSOLE_LOG = "logs/console.log";
-
-			/**
-			 * The file logging channels joins and leaves in logs/ folder
-			 */
-			public static final String CHANNEL_JOINS = "logs/channel-joins.log";
-		}
+		public static final String DATA = "config.yml";
 	}
 
 	public static final class Header {
 
 		/**
-		 * The header for data.db file
+		 * The header for FoConstants.DATA file
 		 */
 		public static final String[] DATA_FILE = new String[]{
 				"",

@@ -49,8 +49,16 @@ public abstract class MenuPagged<T> extends Menu {
 	 */
 	protected Button prevButton;
 
-	protected int nextPageSlot;
-	protected int previousPageSlot;
+	protected int nextPageSlot = getNextPageSlot();
+	protected int previousPageSlot = getPreviousPageSlot();
+
+	protected int getNextPageSlot() {
+		return getSize() - 4;
+	}
+
+	protected int getPreviousPageSlot() {
+		return getSize() - 6;
+	}
 
 
 	/**
@@ -146,9 +154,6 @@ public abstract class MenuPagged<T> extends Menu {
 		this.pages = Common.fillPages(autoPageSize, pages);
 
 		setSize(9 + autoPageSize);
-
-		this.nextPageSlot = getSize() - 6;
-		this.previousPageSlot = getSize() - 4;
 		setButtons();
 	}
 
@@ -225,7 +230,7 @@ public abstract class MenuPagged<T> extends Menu {
 	}
 
 	protected CompMaterial getNoPagesMaterial() {
-		return CompMaterial.LIME_DYE;
+		return CompMaterial.GRAY_DYE;
 	}
 
 	/**
@@ -353,11 +358,11 @@ public abstract class MenuPagged<T> extends Menu {
 		}
 
 		if (slot == this.nextPageSlot) {
-			return this.prevButton.getItem();
+			return this.nextButton.getItem();
 		}
 
 		if (slot == this.previousPageSlot)
-			return this.nextButton.getItem();
+			return this.prevButton.getItem();
 
 		return null;
 	}
@@ -371,7 +376,7 @@ public abstract class MenuPagged<T> extends Menu {
 			final T obj = getCurrentPageItems().get(slot);
 
 			if (obj != null) {
-				final val prevType = player.getOpenInventory().getType();
+				val prevType = player.getOpenInventory().getType();
 				onPageClick(player, obj, click);
 
 				if (updateButtonOnClick() && prevType == player.getOpenInventory().getType())
