@@ -3,7 +3,6 @@ package com.itzrozzadev.fo.constants;
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.TimeUtil;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
-import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
@@ -37,7 +36,7 @@ public final class FoConstants {
 		/**
 		 * The FoConstants.DATA file (uses YAML) for saving various data
 		 */
-		public static final String DATA = "config.yml";
+		public static final String DATA = "data.db";
 	}
 
 	public static final class Header {
@@ -47,7 +46,7 @@ public final class FoConstants {
 		 */
 		public static final String[] DATA_FILE = new String[]{
 				"",
-				"This file stores various data you create via the plugin.",
+				"This file stores metadata for the plugin.",
 				"",
 				" ** THE FILE IS MACHINE GENERATED. PLEASE DO NOT EDIT **",
 				""
@@ -62,14 +61,6 @@ public final class FoConstants {
 				"",
 				" Your file has been automatically updated at " + TimeUtil.getFormattedDate(),
 				" to " + SimplePlugin.getNamed() + " " + SimplePlugin.getVersion(),
-				"",
-				" Unfortunately, due to how Bukkit saves all .yml files, it was not possible",
-				" preserve the documentation comments in your file. I apologize.",
-				"",
-				" If you'd like to view the default file, you can either:",
-				" a) Open the " + SimplePlugin.getSource().getName() + " with a WinRar or similar",
-				" b) Have a look in my discord --> https://discord.gg/et99GQBSSR",
-				"",
 				Common.configLine(),
 				""
 		};
@@ -78,23 +69,17 @@ public final class FoConstants {
 	public static final class NBT {
 
 		/**
-		 * Represents our NBT tag used in {@link NBTUtil}
+		 * Represents our NBT tag
 		 */
 		public static final String TAG = SimplePlugin.getNamed() + "_NbtTag";
 
 		/**
 		 * An internal metadata tag the player gets when he opens the menu
-		 *
-		 * <p>
-		 * Used in {@link #getMenu(Player)}
 		 */
 		public static final String TAG_MENU_CURRENT = SimplePlugin.getNamed() + "_Menu";
 
 		/**
 		 * An internal metadata tag the player gets when he opens another menu
-		 *
-		 * <p>
-		 * Used in {@link #getPreviousMenu(Player)}
 		 */
 		public static final String TAG_MENU_PREVIOUS = SimplePlugin.getNamed() + "_Previous_Menu";
 	}
