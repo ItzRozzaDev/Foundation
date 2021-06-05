@@ -20,6 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 public final class DebugCommand extends SimpleSubCommand {
+	/**
+	 * Create a new sub-command with the given permission.
+	 *
+	 * @param permission
+	 */
+	public DebugCommand(final String permission) {
+		this();
+
+		setPermission(permission);
+	}
 
 	public DebugCommand() {
 		super("debug");

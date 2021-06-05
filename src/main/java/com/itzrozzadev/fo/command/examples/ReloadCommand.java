@@ -11,10 +11,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A simple predefined command for quickly reloading the plugin
+ * A simple predefined subcommand for quickly reloading the plugin
  * using /{label} reload|rl
  */
 public final class ReloadCommand extends SimpleSubCommand {
+	/**
+	 * Create a new reload sub-command with the given permission.
+	 *
+	 * @param permission
+	 */
+	public ReloadCommand(final String permission) {
+		this();
+
+		setPermission(permission);
+	}
 
 	public ReloadCommand() {
 		super("reload|rl");

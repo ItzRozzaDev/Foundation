@@ -2,24 +2,30 @@ package com.itzrozzadev.fo.model;
 
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.collection.StrictSet;
+import com.itzrozzadev.fo.debug.Debugger;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
+import com.itzrozzadev.fo.remain.Remain;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.ListenerPriority;
 import github.scarsz.discordsrv.api.Subscribe;
 import github.scarsz.discordsrv.api.events.DiscordGuildMessagePreProcessEvent;
 import github.scarsz.discordsrv.api.events.GameChatMessagePreProcessEvent;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.Member;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.Message;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.MessageChannel;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
+import github.scarsz.discordsrv.dependencies.jda.api.JDA;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.*;
+import github.scarsz.discordsrv.dependencies.jda.api.exceptions.ErrorResponseException;
+import github.scarsz.discordsrv.dependencies.jda.api.exceptions.HierarchyException;
+import github.scarsz.discordsrv.util.DiscordUtil;
+import github.scarsz.discordsrv.util.WebhookUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public abstract class DiscordListener implements Listener {
@@ -42,9 +48,14 @@ public abstract class DiscordListener implements Listener {
 	private Message message;
 
 	/**
+	 * Used if you edit a message. This maps the old message id to the new one
+	 * because when we edit a message, its ID is changed
+	 */
+	@Getter(value = AccessLevel.PROTECTED)
+	private final Map<Long, Long> editedMessages = new HashMap<>();
+
+	/**
 	 * Create a new Discord listener for the DiscordSRV plugin
-	 *
-	 * @param channel
 	 */
 	protected DiscordListener() {
 		registeredListeners.add(this);
@@ -63,7 +74,7 @@ public abstract class DiscordListener implements Listener {
 	 *
 	 * @param event
 	 */
-	private void handleMessageReceived(final DiscordGuildMessagePreProcessEvent event) {
+	private final void handleMessageReceived(final DiscordGuildMessagePreProcessEvent event) {
 		this.message = event.getMessage();
 
 		onMessageReceived(event);
@@ -99,6 +110,38 @@ public abstract class DiscordListener implements Listener {
 
 		checkBoolean(player != null, offlineMessage);
 		return player;
+	}
+
+	/**
+	 * Retrieve a {@link TextChannel} from the given ID
+	 *
+	 * @param channelId
+	 * @return
+	 */
+	@Nullable
+	protected final TextChannel findChannel(final long channelId) {
+		final JDA jda = DiscordUtil.getJda();
+
+		// JDA can be null when server is starting or connecting
+		if (jda != null)
+			return jda.getTextChannelById(channelId);
+
+		return null;
+	}
+
+	/**
+	 * Retrieve a {@link TextChannel} list matching the given name
+	 *
+	 * @return
+	 */
+	protected final List<TextChannel> findChannels(final String channelName) {
+		final JDA jda = DiscordUtil.getJda();
+
+		// JDA can be null when server is starting or connecting
+		if (jda != null)
+			return jda.getTextChannelsByName(channelName, true);
+
+		return new ArrayList<>();
 	}
 
 	/**
@@ -205,6 +248,170 @@ public abstract class DiscordListener implements Listener {
 	}
 
 	/**
+	 * Sends a webhook message from the given sender in case he's a valid Player
+	 *
+	 * @param sender
+	 * @param channelName
+	 * @param message
+	 */
+	protected final void sendWebhookMessage(final CommandSender sender, final String channelName, final String message) {
+		final List<TextChannel> channels = this.findChannels(channelName);
+		final TextChannel channel = channels.isEmpty() ? null : channels.get(0);
+
+		if (channel == null)
+			return;
+
+		// Send the message
+		Common.runAsync(() -> {
+			try {
+				Debugger.debug("discord", "[Minecraft > Discord] Send MC message from '" + channelName + "' to Discord's '" + channel.getName() + "' channel: " + message);
+
+				// You can remove this if you don't want to use webhooks
+				if (sender instanceof Player)
+					WebhookUtil.deliverMessage(channel, (Player) sender, message);
+
+				else
+					channel.sendMessage(message).complete();
+
+			} catch (final ErrorResponseException ex) {
+				Debugger.debug("discord", "Unable to send message to Discord channel " + channelName + ", message: " + message);
+			}
+		});
+	}
+
+	/**
+	 * Send a message to the given channel for four seconds
+	 *
+	 * @param channel
+	 * @param message
+	 */
+	protected final void flashMessage(final TextChannel channel, final String message) {
+		final String finalMessage = Common.stripColors(message);
+
+		Common.runAsync(() -> {
+			final Message sentMessage = channel.sendMessage(finalMessage).complete();
+
+			Common.runLaterAsync(4 * 20, () -> {
+				try {
+					channel.deleteMessageById(sentMessage.getIdLong()).complete();
+
+				} catch (final github.scarsz.discordsrv.dependencies.jda.api.exceptions.ErrorResponseException ex) {
+
+					// Silence if deleted already
+					if (!ex.getMessage().contains("Unknown Message"))
+						ex.printStackTrace();
+				}
+			});
+		});
+	}
+
+	/**
+	 * Remove the given message by ID
+	 *
+	 * @param channel
+	 * @param messageId
+	 */
+	protected final void deleteMessageById(final TextChannel channel, final long messageId) {
+		Common.runAsync(() -> {
+
+			// Try updating the message ID in case it has been edited
+			final long latestMessageId = this.editedMessages.getOrDefault(messageId, messageId);
+
+			try {
+				channel.deleteMessageById(latestMessageId).complete();
+
+			} catch (final Throwable t) {
+
+				// ignore already deleted
+				if (!(t instanceof github.scarsz.discordsrv.dependencies.jda.api.exceptions.ErrorResponseException))
+					t.printStackTrace();
+
+				else
+					Debugger.debug("discord", "Could not remove Discord message in channel '" + channel.getName() + "' id " + latestMessageId
+							+ ", it was probably deleted otherwise or this is a bug.");
+			}
+		});
+	}
+
+	/**
+	 * Edit the given message by ID
+	 *
+	 * @param channel
+	 * @param messageId
+	 * @param newMessage
+	 */
+	protected final void editMessageById(final TextChannel channel, final long messageId, final String newMessage) {
+		Common.runAsync(() -> {
+			try {
+				final Message message = channel.retrieveMessageById(messageId).complete();
+
+				if (message != null) {
+
+					// Remove old message
+					channel.deleteMessageById(messageId).complete();
+
+					// Send a new one
+					final Message newSentMessage = channel
+							.sendMessage(message.getAuthor().getName() + ": " + newMessage.replace("*", "\\*").replace("_", "\\_").replace("@", "\\@"))
+							.complete();
+
+					this.editedMessages.put(messageId, newSentMessage.getIdLong());
+				}
+
+			} catch (final Throwable t) {
+				if (!t.toString().contains("Unknown Message"))
+					t.printStackTrace();
+			}
+		});
+	}
+
+	/**
+	 * Attempt to parse the sender's name into his Minecraft name in case he linked it
+	 *
+	 * @param member
+	 * @param author
+	 * @return
+	 */
+	protected final String findPlayerName(final Member member, final User author) {
+		final String discordName = Common.getOrDefaultStrict(member.getNickname(), author.getName());
+		final UUID linkedId = DiscordSRV.getPlugin().getAccountLinkManager().getUuid(author.getId());
+
+		final Player player;
+
+		if (linkedId != null)
+
+			// You could potentially look this in offline players too
+			// using an async callback to prevent lag if there's tons
+			// of players saved or in case of a HTTP request
+			player = Remain.getPlayerByUUID(linkedId);
+
+		else
+			player = Bukkit.getPlayer(discordName);
+
+		return player != null && player.isOnline() ? player.getName() : discordName;
+	}
+
+	/**
+	 * Attempt to kick the player name from the channel
+	 *
+	 * @param discordSender
+	 * @param reason
+	 */
+	public final void kickMember(final DiscordSender discordSender, final String reason) {
+		Common.runAsync(() -> {
+			try {
+				final Member member = DiscordUtil.getMemberById(discordSender.getUser().getId());
+
+				if (member != null)
+					member.kick(reason).complete();
+
+			} catch (final HierarchyException ex) {
+				Common.log("Unable to kick " + discordSender.getName() + " because he appears to be Discord administrator");
+			}
+		});
+	}
+
+	/**
 	 * Convenience method for getting all linked DiscordSRV channels
 	 *
 	 * @return
@@ -231,7 +438,7 @@ public abstract class DiscordListener implements Listener {
 	public static final class DiscordListenerImpl implements Listener {
 
 		@Getter
-		private static volatile DiscordListenerImpl instance = new DiscordListenerImpl();
+		private static final DiscordListenerImpl instance = new DiscordListenerImpl();
 
 		/**
 		 * Reload the listener
@@ -243,6 +450,8 @@ public abstract class DiscordListener implements Listener {
 
 		/**
 		 * Register plugin hook
+		 * <p>
+		 * https://github.com/kangarko/ChatControl-Red/issues/703
 		 */
 		public void registerHook() {
 			try {

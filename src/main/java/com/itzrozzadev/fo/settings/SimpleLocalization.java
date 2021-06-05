@@ -1,17 +1,11 @@
 package com.itzrozzadev.fo.settings;
 
-import com.itzrozzadev.fo.FileUtil;
-import com.itzrozzadev.fo.SerializeUtil;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.command.examples.DebugCommand;
 import com.itzrozzadev.fo.command.examples.PermsCommand;
 import com.itzrozzadev.fo.model.ChatPaginator;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
 import org.bukkit.ChatColor;
-import org.bukkit.configuration.file.FileConfiguration;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple implementation of a basic localization file.
@@ -19,40 +13,8 @@ import java.util.List;
  * automatically and fill it with values from your localization/messages_LOCALEPREFIX.yml
  * file placed within in your plugins jar file.
  */
+@SuppressWarnings("unused")
 public abstract class SimpleLocalization extends YamlStaticConfig {
-
-	/**
-	 * A fallback localization is a file in your plugin's JAR we open and look values
-	 * in, when user-selected localization doesn't have them nor it has them in your JAR.
-	 * <br><br>
-	 * Example:<br>
-	 * messages_en.yml as fallback in the JAR<br>
-	 * messages_it.yml in the JAR<br>
-	 * messages_it.yml on the disk & used<br>
-	 * <br>
-	 * When there is a string missing from messages_it on the disk, we try to place the
-	 * default one from the same file in the JAR. However, when messages_it.yml in the
-	 * JAR also lacks this file, we then visit the fallback file.
-	 * <br>
-	 * This saves enormous amount of time since you don't have to copy-paste new
-	 * localization keys over all message files each time you make an update. Instead,
-	 * only place them into the fallback file, by default it's messages_en.yml.
-	 */
-	private static String FALLBACK_LOCALIZATION_FILE = "localization/messages_en.yml";
-
-	/**
-	 * See {@link #FALLBACK_LOCALIZATION_FILE}
-	 *
-	 * @param fallBackFile
-	 */
-	public static void setFallbackLocalizationFile(final String fallBackFile) {
-		FALLBACK_LOCALIZATION_FILE = fallBackFile;
-	}
-
-	/**
-	 * The fallback localization file config instance, see {@link #FALLBACK_LOCALIZATION_FILE}.
-	 */
-	private static FileConfiguration fallbackLocalization;
 
 	/**
 	 * A flag indicating that this class has been loaded
@@ -102,9 +64,6 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 
 		if ((VERSION = getInteger("Version")) != getConfigVersion())
 			set("Version", getConfigVersion());
-
-		// Load English localization file
-		fallbackLocalization = FileUtil.loadInternalConfiguration(FALLBACK_LOCALIZATION_FILE);
 	}
 
 	/**
@@ -115,69 +74,6 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 	 * @return
 	 */
 	protected abstract int getConfigVersion();
-
-	// --------------------------------------------------------------------
-	// Fallback
-	// --------------------------------------------------------------------
-
-	/**
-	 * Get a String from the localization file, utilizing
-	 * {@link #FALLBACK_LOCALIZATION_FILE} mechanics
-	 *
-	 * @param path
-	 * @return
-	 */
-	protected static final String getFallbackString(final String path) {
-		return getFallback(path, String.class);
-	}
-
-	/**
-	 * Get a list from the localization file, utilizing
-	 * {@link #FALLBACK_LOCALIZATION_FILE} mechanics
-	 *
-	 * @param <T>
-	 * @param path
-	 * @param listType
-	 * @return
-	 */
-	protected static final <T> List<T> getFallbackList(final String path, final Class<T> listType) {
-		final List<T> list = new ArrayList<>();
-		final List<Object> objects = getFallback(path, List.class);
-
-		if (objects != null)
-			for (final Object object : objects)
-				list.add(object != null ? SerializeUtil.deserialize(listType, object) : null);
-
-		return list;
-	}
-
-	/**
-	 * Get a key from the localization file, utilizing
-	 * {@link #FALLBACK_LOCALIZATION_FILE} mechanics
-	 *
-	 * @param <T>
-	 * @param path
-	 * @param typeOf
-	 * @return
-	 */
-	protected static final <T> T getFallback(final String path, final Class<T> typeOf) {
-
-		// If string already exists, has a default path, or locale is set to english, use the native method
-		if (isSet(path) || isSetDefault(path) || "en".equals(SimpleSettings.LOCALE_PREFIX))
-			return get(path, typeOf);
-
-		// Try to pull the value from English localization
-		final String relativePath = formPathPrefix(path);
-		final Object key = fallbackLocalization.get(relativePath);
-
-		Valid.checkNotNull(key, "Neither " + getFileName() + ", the default one, nor " + FALLBACK_LOCALIZATION_FILE + " contained " + relativePath + "! Please report this to " + SimplePlugin.getNamed() + " developers!");
-		Valid.checkBoolean(key.getClass().isAssignableFrom(typeOf), "Expected " + typeOf + " at " + relativePath + " in " + FALLBACK_LOCALIZATION_FILE + " but got " + key.getClass() + ": " + key);
-
-		// Write it to the file being used
-		set(path, key);
-
-		return (T) key;
-	}
 
 	// --------------------------------------------------------------------
 	// Shared values
@@ -218,12 +114,12 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The authors label
 		 */
-		public static String LABEL_AUTHORS = "Developed by";
+		public static String LABEL_AUTHORS = "Made by";
 
 		/**
 		 * The description label
 		 */
-		public static String LABEL_DESCRIPTION = "&lDescription:";
+		public static String LABEL_DESCRIPTION = "&c&lDescription:";
 
 		/**
 		 * The optional arguments label
@@ -268,7 +164,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		public static String HELP_TOOLTIP_USAGE = "&7Usage: &f";
 
 		/**
-		 * The keys below are used in the {@link ReloadCommand}
+		 * The keys below are used in the ReloadCommand
 		 */
 		public static String RELOAD_DESCRIPTION = "Reloads the plugin";
 		public static String RELOAD_STARTED = "Reloading plugin, please wait..";
@@ -299,15 +195,15 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The secondary color shown in the ----- COMMAND ----- header such as in /chc ?
 		 */
-		public static ChatColor HEADER_SECONDARY_COLOR = ChatColor.GRAY;
+		public static ChatColor HEADER_SECONDARY_COLOR = ChatColor.RED;
 
 		/**
-		 * Key for when plugin is reloading {@link com.itzrozzadev.fo.plugin.SimplePlugin}
+		 * Key for when plugin is reloading
 		 */
 		public static String RELOADING = "reloading";
 
 		/**
-		 * Key for when plugin is disabled {@link com.itzrozzadev.fo.plugin.SimplePlugin}
+		 * Key for when plugin is disabled
 		 */
 		public static String DISABLED = "disabled";
 
@@ -328,17 +224,17 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The keys below are used in the {@link PermsCommand}
 		 */
-		public static String PERMS_DESCRIPTION = "Lists all permissions this plugin has.";
+		public static String PERMS_DESCRIPTION = "List all permissions the plugin has.";
 		public static String PERMS_USAGE = "[phrase]";
-		public static String PERMS_HEADER = "{plugin_name} Permissions";
-		public static String PERMS_MAIN = "{plugin_name}";
+		public static String PERMS_HEADER = "Listing All {plugin_name} Permissions";
+		public static String PERMS_MAIN = "Main";
 		public static String PERMS_PERMISSIONS = "Permissions:";
 		public static String PERMS_TRUE_BY_DEFAULT = "&7[true by default]";
 		public static String PERMS_INFO = "&7Info: &f";
 		public static String PERMS_DEFAULT = "&7Default? ";
 		public static String PERMS_APPLIED = "&7Do you have it? ";
-		public static String PERMS_YES = "&2Yes";
-		public static String PERMS_NO = "&cNo";
+		public static String PERMS_YES = "&2yes";
+		public static String PERMS_NO = "&cno";
 
 		/**
 		 * Load the values -- this method is called automatically by reflection in the {@link YamlStaticConfig} class!
@@ -460,10 +356,11 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 			if (isSetDefault("Perms_Description"))
 				PERMS_DESCRIPTION = getString("Perms_Description");
 
-			if (isSetDefault("Perms_Header"))
-				PERMS_HEADER = getString("Perms_Header");
 			if (isSetDefault("Perms_Usage"))
 				PERMS_USAGE = getString("Perms_Usage");
+
+			if (isSetDefault("Perms_Header"))
+				PERMS_HEADER = getString("Perms_Header");
 
 			if (isSetDefault("Perms_Main"))
 				PERMS_MAIN = getString("Perms_Main");
@@ -518,7 +415,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 	public static final class Pages {
 
 		/**
-		 * Below you find different keys called from {@link FoundationListener}
+		 * Below you find different keys called from
 		 */
 
 		public static String NO_PAGE_NUMBER = "&cPlease specify the page number for this command.";
@@ -699,9 +596,14 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 	}
 
 	/**
+	 * Denotes the "none" message
+	 */
+	public static String NONE;
+
+	/**
 	 * The message for player if they lack a permission.
 	 */
-	public static String NO_PERMISSION = "&cInsufficient permissions.";
+	public static String NO_PERMISSION = "&cInsufficient permission ({permission}).";
 
 	/**
 	 * The server prefix. Example: you have to use it manually if you are sending messages
@@ -715,8 +617,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 	public static String CONSOLE_NAME = "Console";
 
 	/**
-	 * The message when a section is missing from FoConstants.DATA file (typically we use
-	 * this file to store serialized values such as arenas from minigame plugins).
+	 * The message when a section is missing from data.db file
 	 */
 	public static String DATA_MISSING = "&c{name} lacks database information! Please only create {type} in-game! Skipping..";
 
@@ -746,6 +647,9 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 
 		if (isSetDefault("Conversation_Requires_Player"))
 			CONVERSATION_REQUIRES_PLAYER = getString("Conversation_Requires_Player");
+
+		if (isSetDefault("None"))
+			NONE = getString("None");
 
 		localizationClassCalled = true;
 	}

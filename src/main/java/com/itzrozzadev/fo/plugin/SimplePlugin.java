@@ -42,9 +42,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -102,6 +100,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 	/**
 	 * Returns the instance of {@link SimplePlugin}.
+	 * <p>
 	 * It is recommended to override this in your own {@link SimplePlugin}
 	 * implementation so you will get the instance of that, directly.
 	 *
@@ -131,7 +130,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 *
 	 * @return if the instance has been set.
 	 */
-	public static boolean hasInstance() {
+	public static final boolean hasInstance() {
 		return instance != null;
 	}
 
@@ -179,6 +178,9 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		named = instance.getName();
 		source = instance.getFile();
 		data = instance.getDataFolder();
+
+		// Add console filters early - no reload support
+		FoundationFilter.inject();
 
 		// Call parent
 		onPluginLoad();
@@ -283,6 +285,10 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			if (!this.isEnabled || !isEnabled())
 				return;
 
+			// Hide plugin name before console messages
+			final boolean hadLogPrefix = Common.ADD_LOG_PREFIX;
+			Common.ADD_LOG_PREFIX = false;
+
 			this.startingReloadables = true;
 			onReloadablesStart();
 			this.startingReloadables = false;
@@ -309,7 +315,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			registerEvents(new EnchantmentListener());
 
 			// Register our packet listener
-			FoundationPacketListener.addPacketListener();
+			FoundationPacketListener.addNativeListener();
 
 			// Register DiscordSRV listener
 			if (HookManager.isDiscordSRVLoaded()) {
@@ -321,8 +327,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				this.reloadables.registerEvents(DiscordListener.DiscordListenerImpl.getInstance());
 			}
 
-			// Set the logging and tell prefix
-			Common.setTellPrefix(SimpleSettings.PLUGIN_PREFIX);
+			// Prepare Nashorn engine
+			JavaScriptExecutor.run("");
 
 			// Finish off by starting metrics (currently bStats)
 			final int pluginId = getMetricsPluginId();
@@ -330,8 +336,11 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			if (pluginId != -1)
 				new Metrics(this, pluginId);
 
-			// Prepare Nashorn engine
-			JavaScriptExecutor.run("");
+			// Set the logging and tell prefix
+			Common.setTellPrefix(SimpleSettings.PLUGIN_PREFIX);
+
+			// Finally, place plugin name before console messages after plugin has (re)loaded
+			Common.runLater(() -> Common.ADD_LOG_PREFIX = hadLogPrefix);
 
 		} catch (final Throwable t) {
 			displayError0(t);
@@ -341,7 +350,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	/**
 	 * Convenience method for registering channels to BungeeCord
 	 */
-	private void registerBungeeCord() {
+	private final void registerBungeeCord() {
 		final Messenger messenger = getServer().getMessenger();
 		final SimpleBungee bungee = getBungeeCord();
 
@@ -450,10 +459,10 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	/**
 	 * A dirty way of checking if Foundation has been shaded correctly
 	 */
-	private void checkShading() {
+	private final void checkShading() {
 		try {
 			throw new ShadingException();
-		} catch (final Throwable ignored) {
+		} catch (final Throwable t) {
 		}
 	}
 
@@ -476,7 +485,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				Bukkit.getLogger().severe("");
 				Bukkit.getLogger().severe("This is likely caused by two plugins having the");
 				Bukkit.getLogger().severe("same Foundation library paths - make sure you");
-				Bukkit.getLogger().severe("relocate the package! If you are testing using");
+				Bukkit.getLogger().severe("relocale the package! If you are testing using");
 				Bukkit.getLogger().severe("Ant, only test one plugin at the time.");
 				Bukkit.getLogger().severe("");
 				Bukkit.getLogger().severe("Possible cause: " + SimplePlugin.getNamed());
@@ -494,7 +503,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 *
 	 * @return
 	 */
-	private boolean checkLibraries0() {
+	private final boolean checkLibraries0() {
 		boolean md_5 = false;
 		boolean gson = false;
 
@@ -519,7 +528,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			Bukkit.getLogger().severe("Gson (by Google) found: " + gson);
 			Bukkit.getLogger().severe(" ");
 			Bukkit.getLogger().severe("To fix that, please install BungeeChatAPI:");
-			Bukkit.getLogger().severe("https://www.spigotmc.org/resources/38379/");
+			Bukkit.getLogger().severe("https://mineacademy.org/plugins/#misc");
 			Bukkit.getLogger().severe(Common.consoleLine());
 		}
 
@@ -531,19 +540,18 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 *
 	 * @return
 	 */
-	private boolean checkServerVersions0() {
+	private final boolean checkServerVersions0() {
 
 		// Call the static block to test compatibility early
-		if (!MinecraftVersion.getCurrent().isTested()) {
+		if (!MinecraftVersion.getCurrent().isTested())
 			Common.logFramed(
 					"*** WARNING ***",
 					"Your Minecraft version " + MinecraftVersion.getCurrent() + " has not yet",
-					"been officially tested with the Foundation,",
+					"been officialy tested with the Foundation,",
 					"the library that " + SimplePlugin.getNamed() + " plugin uses.",
 					"",
 					"Loading the plugin at your own risk...",
 					Common.consoleLine());
-		}
 
 		// Check min version
 		final MinecraftVersion.V minimumVersion = getMinimumVersion();
@@ -756,7 +764,9 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 			CompMetadata.MetadataFile.onReload();
 
-			FoundationPacketListener.addPacketListener();
+			FoundationPacketListener.addNativeListener();
+
+			Lang.reloadFile();
 
 			Common.setTellPrefix(SimpleSettings.PLUGIN_PREFIX);
 			onPluginReload();
@@ -792,7 +802,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		}
 	}
 
-	private void unregisterReloadables() {
+	private final void unregisterReloadables() {
 		SimpleSettings.resetSettingsCall();
 		SimpleLocalization.resetLocalizationCall();
 
@@ -885,7 +895,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 *
 	 * @param command
 	 */
-	public final void registerCommand(final SimpleCommand command) {
+	protected final void registerCommand(final SimpleCommand command) {
 		command.register();
 	}
 
@@ -1000,6 +1010,19 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 */
 	public int getMetricsPluginId() {
 		return -1;
+	}
+
+	/**
+	 * Foundation automatically can filter console commands for you, including
+	 * messages from other plugins or the server itself, preventing unnecessary console spam.
+	 * <p>
+	 * You can return a list of messages that will be matched using "startsWith OR contains" method
+	 * and will be filtered.
+	 *
+	 * @return
+	 */
+	public Set<String> getConsoleFilter() {
+		return new HashSet<>();
 	}
 
 	/**

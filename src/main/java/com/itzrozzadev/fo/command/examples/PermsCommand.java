@@ -10,6 +10,7 @@ import com.itzrozzadev.fo.model.ChatPaginator;
 import com.itzrozzadev.fo.model.Replacer;
 import com.itzrozzadev.fo.model.SimpleComponent;
 import com.itzrozzadev.fo.settings.SimpleLocalization.Commands;
+import com.itzrozzadev.fo.settings.SimpleSettings;
 import lombok.NonNull;
 
 import java.lang.reflect.Field;
@@ -32,11 +33,40 @@ public final class PermsCommand extends SimpleSubCommand {
 	 */
 	private final SerializedMap variables;
 
-	public PermsCommand(@NonNull final Class<? extends FoPermissions> classToList) {
-		this(classToList, new SerializedMap());
+	/**
+	 * Create a new "permisions|perms" subcommand using the given class
+	 * that automatically replaces {label} in the \@PermissionGroup annotation in that class.
+	 *
+	 * @param classToList
+	 */
+	public PermsCommand(@NonNull Class<? extends FoPermissions> classToList) {
+		this(classToList, SerializedMap
+				.of("label", SimpleSettings.MAIN_COMMAND_ALIASES.get(0)));
 	}
 
-	public PermsCommand(@NonNull final Class<? extends FoPermissions> classToList, final SerializedMap variables) {
+	/**
+	 * Create a new "permisions|perms" subcommand using the given class
+	 * that automatically replaces {label} in the \@PermissionGroup annotation in that class
+	 * and the given command permission.
+	 *
+	 * @param classToList
+	 * @param permission
+	 */
+	public PermsCommand(@NonNull Class<? extends FoPermissions> classToList, String permission) {
+		this(classToList, SerializedMap
+				.of("label", SimpleSettings.MAIN_COMMAND_ALIASES.get(0)));
+
+		setPermission(permission);
+	}
+
+	/**
+	 * Create a new "permisions|perms" subcommand using the given class with
+	 * the given variables to replace in the \@PermissionGroup annotation in that class.
+	 *
+	 * @param classToList
+	 * @param variables
+	 */
+	public PermsCommand(@NonNull Class<? extends FoPermissions> classToList, SerializedMap variables) {
 		super("permissions|perms");
 
 		this.classToList = classToList;
@@ -71,7 +101,7 @@ public final class PermsCommand extends SimpleSubCommand {
 	 * Iterate through all classes and superclasses in the given classes and fill their permissions
 	 * that match the given phrase
 	 */
-	private List<SimpleComponent> list(final String phrase) {
+	private List<SimpleComponent> list(String phrase) {
 		final List<SimpleComponent> messages = new ArrayList<>();
 		Class<?> iteratedClass = classToList;
 
@@ -92,7 +122,7 @@ public final class PermsCommand extends SimpleSubCommand {
 	 * Find annotations and compile permissions list from the given class and given existing
 	 * permissions that match the given phrase
 	 */
-	private void listIn(final Class<?> clazz, final List<SimpleComponent> messages, final String phrase) throws ReflectiveOperationException {
+	private void listIn(Class<?> clazz, List<SimpleComponent> messages, String phrase) throws ReflectiveOperationException {
 
 		if (!clazz.isAssignableFrom(FoPermissions.class)) {
 			final PermissionGroup group = clazz.getAnnotation(PermissionGroup.class);
@@ -118,7 +148,7 @@ public final class PermsCommand extends SimpleSubCommand {
 				throw new FoException("Forgotten unreplaced variable in " + info + " for field " + field + " in " + clazz);
 
 			final String node = Replacer.replaceVariables((String) field.get(null), variables);
-			final boolean has = sender != null && hasPerm(node);
+			final boolean has = sender == null ? false : hasPerm(node);
 
 			if (phrase == null || node.contains(phrase))
 				messages.add(SimpleComponent
@@ -135,7 +165,7 @@ public final class PermsCommand extends SimpleSubCommand {
 			listIn(inner, messages, phrase);
 		}
 	}
-
+	
 	@Override
 	protected List<String> tabComplete() {
 		return NO_COMPLETE;

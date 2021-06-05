@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -46,6 +47,21 @@ import java.util.regex.Pattern;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SerializeUtil {
 
+	/**
+	 * A list of custom serializers
+	 */
+	private static final Map<Class<Object>, Function<Object, String>> serializers = new HashMap<>();
+
+	/**
+	 * Add a custom serializer to the list
+	 *
+	 * @param <T>
+	 * @param fromClass
+	 * @param serializer
+	 */
+	public static <T> void addSerializer(final Class<T> fromClass, final Function<T, String> serializer) {
+		serializers.put((Class<Object>) fromClass, (Function<Object, String>) serializer);
+	}
 	// ------------------------------------------------------------------------------------------------------------
 	// Converting objects into strings so you can save them in your files
 	// ------------------------------------------------------------------------------------------------------------
@@ -165,6 +181,8 @@ public final class SerializeUtil {
 
 		else if (obj instanceof ConfigurationSerializable)
 			return ((ConfigurationSerializable) obj).serialize();
+		else if (serializers.containsKey(obj.getClass()))
+			return serializers.get(obj.getClass()).apply(obj);
 
 		throw new SerializeFailedException("Does not know how to serialize " + obj.getClass().getSimpleName() + "! Does it extends ConfigSerializable? Data: " + obj);
 	}
