@@ -119,7 +119,7 @@ public abstract class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The description label
 		 */
-		public static String LABEL_DESCRIPTION = "&c&lDescription:";
+		public static String LABEL_DESCRIPTION = "&lDescription:";
 
 		/**
 		 * The optional arguments label
