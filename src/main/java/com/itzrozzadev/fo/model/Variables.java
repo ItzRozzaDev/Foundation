@@ -46,7 +46,7 @@ public final class Variables {
 	/**
 	 * Player - [Original Message - Translated Message]
 	 */
-	private static final Map<String, Map<String, String>> cache = ExpiringMap.builder().expiration(10, TimeUnit.MILLISECONDS).build();
+	private static final Map<String, Map<String, String>> cache = ExpiringMap.builder().expiration(500, TimeUnit.MILLISECONDS).build();
 
 	/**
 	 * Should we replace javascript placeholders from variables/ folder automatically?

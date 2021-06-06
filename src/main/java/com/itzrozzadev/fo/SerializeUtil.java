@@ -62,6 +62,7 @@ public final class SerializeUtil {
 	public static <T> void addSerializer(final Class<T> fromClass, final Function<T, String> serializer) {
 		serializers.put((Class<Object>) fromClass, (Function<Object, String>) serializer);
 	}
+
 	// ------------------------------------------------------------------------------------------------------------
 	// Converting objects into strings so you can save them in your files
 	// ------------------------------------------------------------------------------------------------------------
@@ -75,6 +76,9 @@ public final class SerializeUtil {
 	public static Object serialize(final Object obj) {
 		if (obj == null)
 			return null;
+
+		if (serializers.containsKey(obj.getClass()))
+			return serializers.get(obj.getClass()).apply(obj);
 
 		if (obj instanceof ConfigSerializable)
 			return serialize(((ConfigSerializable) obj).serialize().serialize());
@@ -153,6 +157,7 @@ public final class SerializeUtil {
 					serialized.add(serialize(element));
 
 			return serialized;
+
 		} else if (obj instanceof StrictMap) {
 			final StrictMap<Object, Object> oldMap = (StrictMap<Object, Object>) obj;
 			final StrictMap<Object, Object> newMap = new StrictMap<>();
@@ -161,6 +166,7 @@ public final class SerializeUtil {
 				newMap.put(serialize(entry.getKey()), serialize(entry.getValue()));
 
 			return newMap;
+
 		} else if (obj instanceof Map) {
 			final Map<Object, Object> oldMap = (Map<Object, Object>) obj;
 			final Map<Object, Object> newMap = new LinkedHashMap<>();
@@ -169,8 +175,10 @@ public final class SerializeUtil {
 				newMap.put(serialize(entry.getKey()), serialize(entry.getValue()));
 
 			return newMap;
+
 		} else if (obj instanceof YamlConfig)
-			throw new SerializeFailedException("To save your YamlConfig " + obj.getClass().getSimpleName() + " make it implement ConfigSerializable!");
+			throw new SerializeFailedException("Called serialize for YamlConfig's '" + obj.getClass().getSimpleName()
+					+ "' but failed, if you're trying to save it make it implement ConfigSerializable!");
 
 		else if (obj instanceof Integer || obj instanceof Double || obj instanceof Float || obj instanceof Long || obj instanceof Short
 				|| obj instanceof String || obj instanceof Boolean || obj instanceof Map
@@ -181,8 +189,6 @@ public final class SerializeUtil {
 
 		else if (obj instanceof ConfigurationSerializable)
 			return ((ConfigurationSerializable) obj).serialize();
-		else if (serializers.containsKey(obj.getClass()))
-			return serializers.get(obj.getClass()).apply(obj);
 
 		throw new SerializeFailedException("Does not know how to serialize " + obj.getClass().getSimpleName() + "! Does it extends ConfigSerializable? Data: " + obj);
 	}
@@ -247,6 +253,7 @@ public final class SerializeUtil {
 	 * @param deserializeParameters, use more variables in the deserialize method
 	 * @return
 	 */
+	@SuppressWarnings("rawtypes")
 	public static <T> T deserialize(@NonNull final Class<T> classOf, @NonNull Object object, final Object... deserializeParameters) {
 		final SerializedMap map = SerializedMap.of(object);
 

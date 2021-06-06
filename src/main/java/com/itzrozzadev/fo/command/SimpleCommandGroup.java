@@ -453,6 +453,7 @@ public abstract class SimpleCommandGroup {
 								"label", SimpleCommandGroup.this.mainArgument + "/" + getLabel(),
 								"sublabel", SimpleCommandGroup.this.firstArgument + subcommand.getSubLabel(),
 								"usage", usage,
+								"sublabel", (atLeast17 ? "&n" : "") + subcommand.getSubLabel() + (atLeast17 ? "&r" : ""),
 								"description", !desc.isEmpty() && !atLeast17 ? desc : "",
 								"dash", !desc.isEmpty() && !atLeast17 ? "&e-" : "");
 
