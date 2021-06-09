@@ -7,6 +7,8 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.WrappedServerPing;
 import com.itzrozzadev.fo.debug.Debugger;
 import com.itzrozzadev.fo.exception.EventHandledException;
 import com.itzrozzadev.fo.exception.FoException;
@@ -20,9 +22,12 @@ import lombok.NoArgsConstructor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+
 
 /**
  * Represents packet handling using ProtocolLib
@@ -111,6 +116,24 @@ public final class PacketUtil {
 					consumer.accept(event);
 			}
 		});
+	}
+
+	/**
+	 * Sets the hoverable text in the server's menu
+	 * To use this, create a new addSendingListener for PacketType.Status.Server.SERVER_INFO
+	 * and get the {@link WrappedServerPing} from event.getPacket().getServerPings().read(0)
+	 * then finallly call WrappedServerPing#setPlayers method
+	 *
+	 * @param hoverTexts
+	 */
+	public static List<WrappedGameProfile> compileHoverText(final String... hoverTexts) {
+		final List<WrappedGameProfile> profiles = new ArrayList<>();
+
+		int count = 0;
+		for (final String hoverText : hoverTexts)
+			profiles.add(new WrappedGameProfile(String.valueOf(count++), Common.colorize(hoverText)));
+
+		return profiles;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------

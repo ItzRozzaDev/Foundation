@@ -82,14 +82,12 @@ public class SimpleScoreboard {
 	 * The title of this scoreboard
 	 */
 	@Getter
-	@Setter
 	private String title;
 
 	/**
 	 * The update tick delay
 	 */
 	@Getter
-	@Setter
 	private int updateDelayTicks;
 
 	// ------------------------------------------------------------------------------------------------------------
@@ -160,14 +158,14 @@ public class SimpleScoreboard {
 	 * @param entries
 	 */
 	public final void addRows(final List<String> entries) {
-		rows.addAll(entries);
+		this.rows.addAll(entries);
 	}
 
 	/**
 	 * Remove all rows
 	 */
 	public final void clearRows() {
-		rows.clear();
+		this.rows.clear();
 	}
 
 	/**
@@ -176,7 +174,7 @@ public class SimpleScoreboard {
 	 * @param index
 	 */
 	public final void removeRow(final int index) {
-		rows.remove(index);
+		this.rows.remove(index);
 	}
 
 	/**
@@ -185,7 +183,7 @@ public class SimpleScoreboard {
 	 * @param thatContains
 	 */
 	public final void removeRow(final String thatContains) {
-		for (final Iterator<String> it = rows.iterator(); it.hasNext(); ) {
+		for (final Iterator<String> it = this.rows.iterator(); it.hasNext(); ) {
 			final String row = it.next();
 
 			if (row.contains(thatContains))
@@ -200,10 +198,10 @@ public class SimpleScoreboard {
 	/**
 	 * Starts visualizing this scoreboard
 	 */
-	private void start() {
-		Valid.checkBoolean(updateTask == null, "Scoreboard " + this + " already running");
+	private final void start() {
+		Valid.checkBoolean(this.updateTask == null, "Scoreboard " + this + " already running");
 
-		updateTask = new CompRunnable() {
+		this.updateTask = new CompRunnable() {
 			@Override
 			public void run() {
 
@@ -211,7 +209,7 @@ public class SimpleScoreboard {
 					update();
 
 				} catch (final Throwable t) {
-					final String lines = String.join(" ", rows);
+					final String lines = String.join(" ", SimpleScoreboard.this.rows);
 
 					Common.error(t,
 							"Error displaying " + SimpleScoreboard.this,
@@ -222,16 +220,16 @@ public class SimpleScoreboard {
 					stop();
 				}
 			}
-		}.runTaskTimer(SimplePlugin.getInstance(), 0, updateDelayTicks);
+		}.runTaskTimer(SimplePlugin.getInstance(), 0, this.updateDelayTicks);
 	}
 
 	/**
 	 * Updates this scoreboard
 	 */
-	private void update() {
+	private final void update() {
 		onUpdate();
 
-		for (final ViewedScoreboard viewedScoreboard : scoreboards) {
+		for (final ViewedScoreboard viewedScoreboard : this.scoreboards) {
 			resetObjective(viewedScoreboard);
 			reloadEntries(viewedScoreboard);
 		}
@@ -242,7 +240,7 @@ public class SimpleScoreboard {
 	 *
 	 * @param viewedScoreboard
 	 */
-	private void resetObjective(final ViewedScoreboard viewedScoreboard) {
+	private final void resetObjective(final ViewedScoreboard viewedScoreboard) {
 		final Scoreboard scoreboard = viewedScoreboard.getScoreboard();
 		Objective objective = viewedScoreboard.getObjective();
 
@@ -251,7 +249,7 @@ public class SimpleScoreboard {
 
 		objective = scoreboard.registerNewObjective(viewedScoreboard.getViewer().getName(), "dummy");
 
-		objective.setDisplayName(Common.colorize(title));
+		objective.setDisplayName(Common.colorize(this.title));
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
 		viewedScoreboard.setObjective(objective);
@@ -262,12 +260,12 @@ public class SimpleScoreboard {
 	 *
 	 * @param viewedScoreboard
 	 */
-	private void reloadEntries(final ViewedScoreboard viewedScoreboard) {
+	private final void reloadEntries(final ViewedScoreboard viewedScoreboard) {
 		final Objective objective = viewedScoreboard.getObjective();
 		final StrictList<String> duplicates = new StrictList<>();
 
-		for (int i = rows.size(); i > 0; i--) {
-			final String sidebarEntry = rows.get(rows.size() - i);
+		for (int i = this.rows.size(); i > 0; i--) {
+			final String sidebarEntry = this.rows.get(this.rows.size() - i);
 			final String entry = replaceVariables(viewedScoreboard.getViewer(), replaceTheme(sidebarEntry));
 
 			String line = fixDuplicates(duplicates, entry);
@@ -285,16 +283,16 @@ public class SimpleScoreboard {
 	 * @param row
 	 * @return
 	 */
-	private String replaceTheme(final String row) {
-		if (theme != null && row.contains(":"))
-			if (theme.length == 1)
-				return theme[0] + row;
+	private final String replaceTheme(final String row) {
+		if (this.theme != null && row.contains(":"))
+			if (this.theme.length == 1)
+				return this.theme[0] + row;
 
-			else if (theme[0] != null) {
+			else if (this.theme[0] != null) {
 				final String[] split = row.split("\\:");
 
 				if (split.length > 1)
-					return theme[0] + split[0] + ":" + theme[1] + split[1];
+					return this.theme[0] + split[0] + ":" + this.theme[1] + split[1];
 			}
 
 		return row;
@@ -326,7 +324,7 @@ public class SimpleScoreboard {
 	 * @param message
 	 * @return
 	 */
-	private String fixDuplicates(final StrictList<String> duplicates, String message) {
+	private final String fixDuplicates(final StrictList<String> duplicates, String message) {
 		message = StringUtils.substring(message, 0, 40);
 
 		final boolean cut = MinecraftVersion.olderThan(V.v1_8);
@@ -366,25 +364,25 @@ public class SimpleScoreboard {
 	 * Stops this scoreboard and removes it from all viewers
 	 */
 	public final void stop() {
-		for (final Iterator<ViewedScoreboard> iterator = scoreboards.iterator(); iterator.hasNext(); ) {
+		for (final Iterator<ViewedScoreboard> iterator = this.scoreboards.iterator(); iterator.hasNext(); ) {
 			final ViewedScoreboard score = iterator.next();
 
 			score.getViewer().setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 			iterator.remove();
 		}
 
-		if (updateTask != null)
+		if (this.updateTask != null)
 			cancelUpdateTask();
 	}
 
 	/**
 	 * Cancels the update task
 	 */
-	private void cancelUpdateTask() {
-		Valid.checkNotNull(updateTask, "Scoreboard " + this + " not running");
+	private final void cancelUpdateTask() {
+		Valid.checkNotNull(this.updateTask, "Scoreboard " + this + " not running");
 
-		updateTask.cancel();
-		updateTask = null;
+		this.updateTask.cancel();
+		this.updateTask = null;
 	}
 
 	/**
@@ -393,7 +391,21 @@ public class SimpleScoreboard {
 	 * @return
 	 */
 	public final boolean isRunning() {
-		return updateTask != null;
+		return this.updateTask != null;
+	}
+
+	/**
+	 * @param updateDelayTicks the updateDelayTicks to set
+	 */
+	public final void setUpdateDelayTicks(final int updateDelayTicks) {
+		this.updateDelayTicks = updateDelayTicks;
+	}
+
+	/**
+	 * @param title the title to set
+	 */
+	public final void setTitle(final String title) {
+		this.title = title;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------
@@ -408,12 +420,12 @@ public class SimpleScoreboard {
 	public final void show(final Player player) {
 		Valid.checkBoolean(!isViewing(player), "Player " + player.getName() + " is already viewing scoreboard: " + getTitle());
 
-		if (updateTask == null)
+		if (this.updateTask == null)
 			start();
 
 		final Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
 
-		scoreboards.add(new ViewedScoreboard(scoreboard, null, player));
+		this.scoreboards.add(new ViewedScoreboard(scoreboard, null, player));
 		player.setScoreboard(scoreboard);
 	}
 
@@ -427,13 +439,13 @@ public class SimpleScoreboard {
 
 		player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
-		for (final ViewedScoreboard viewed : scoreboards)
+		for (final ViewedScoreboard viewed : this.scoreboards)
 			if (viewed.getViewer().equals(player)) {
-				scoreboards.remove(viewed);
+				this.scoreboards.remove(viewed);
 				break;
 			}
 
-		if (scoreboards.isEmpty())
+		if (this.scoreboards.isEmpty())
 			cancelUpdateTask();
 	}
 
@@ -444,7 +456,7 @@ public class SimpleScoreboard {
 	 * @return
 	 */
 	public final boolean isViewing(final Player player) {
-		for (final ViewedScoreboard viewed : scoreboards)
+		for (final ViewedScoreboard viewed : this.scoreboards)
 			if (viewed.getViewer().equals(player))
 				return true;
 

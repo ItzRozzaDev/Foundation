@@ -808,8 +808,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 		BlockVisualizer.stopAll();
 		FolderWatcher.stopThreads();
-
-		DiscordListener.clearRegisteredListeners();
+		if (HookManager.isDiscordSRVLoaded())
+			DiscordListener.clearRegisteredListeners();
 
 		try {
 			HookManager.unloadDependencies(this);

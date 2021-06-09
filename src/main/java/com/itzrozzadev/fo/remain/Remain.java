@@ -2263,6 +2263,23 @@ public final class Remain {
 		return Integer.parseInt(version);
 	}
 
+	/**
+	 * Return the server's ticks per second (requires Paper otherwise we return 20)
+	 *
+	 * @return
+	 */
+	public static int getTPS() {
+
+		try {
+			final Method getTPS = Bukkit.class.getDeclaredMethod("getTPS", double[].class);
+
+			return (int) MathUtil.floor(getTPS == null ? 20 : ((double[]) getTPS.invoke(null))[0]);
+		} catch (final ReflectiveOperationException ex) {
+
+			// Unsupported
+			return 20;
+		}
+	}
 	// ----------------------------------------------------------------------------------------------------
 	// Getters for various server functions
 	// ----------------------------------------------------------------------------------------------------
