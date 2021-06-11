@@ -460,7 +460,7 @@ public abstract class SimpleCommandGroup {
 						final SimpleComponent line = SimpleComponent.of(plainMessage);
 
 						if (!desc.isEmpty() && atLeast17) {
-							final String command = Common.stripColors(plainMessage).substring(1);
+							final String command = SimpleCommandGroup.this.mainArgument + "/" + getLabel() + SimpleCommandGroup.this.firstArgument + subcommand.getSubLabel();
 							final List<String> hover = new ArrayList<>();
 
 							hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_DESCRIPTION.replace("{description}", desc));
@@ -475,7 +475,7 @@ public abstract class SimpleCommandGroup {
 									hover.add("&f" + replacePlaceholders(colorizeUsage(usageLine.replace("{sublabel}", subcommand.getSubLabel()))));
 
 							} else
-								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE + (usage.isEmpty() ? command : usage));
+								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE + (usage.isEmpty() ? command : command + usage));
 
 							line.onHover(hover);
 							line.onClickSuggestCmd("/" + getLabel() + " " + subcommand.getSubLabel());
