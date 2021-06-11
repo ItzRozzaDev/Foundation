@@ -48,6 +48,10 @@ public class StringUtil {
 			return "0";
 	}
 
+	public String formatLetterDouble(final double number) {
+		return formatLetterDouble(number, "kMBTqQsS");
+	}
+
 	public String formatLetterDouble(final double number, final String letters) {
 		if (number == 0) return "0";
 		if (number < 1000) return "" + number;
@@ -79,16 +83,18 @@ public class StringUtil {
 		return true;
 	}
 
+	public String bracketText(final CompColor textColor, final String text) {
+		return bracketText(CompColor.DARK_GRAY, textColor, text);
+	}
+
 	public String bracketText(final CompColor bracketColor, final CompColor textColor, final String text) {
 		return bracketText(bracketColor, false, textColor, false, text);
-
 	}
 
 	public String bracketText(final CompColor bracketColor, final boolean bracketsBold, final CompColor textColor, final boolean textBold, final String text) {
 		final ChatColor bracketChatColor = bracketColor.getChatColor();
 		final ChatColor textChatColor = textColor.getChatColor();
 		return (bracketsBold ? bracketChatColor + "" + ChatColor.BOLD : bracketChatColor) + "[&r" + (textBold ? textChatColor + "" + ChatColor.BOLD : textChatColor) + text + "&r" + bracketChatColor + "]";
-
 	}
 
 }
