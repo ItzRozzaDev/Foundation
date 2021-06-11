@@ -88,9 +88,7 @@ public final class ChatUtil {
 			if (c == '&' || c == ChatColor.COLOR_CHAR) {
 				previousCode = true;
 
-				continue;
-
-			} else if (previousCode == true) {
+			} else if (previousCode) {
 				previousCode = false;
 
 				if (c == 'l' || c == 'L') {
