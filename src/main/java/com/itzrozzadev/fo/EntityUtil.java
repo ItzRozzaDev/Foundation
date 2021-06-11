@@ -3,7 +3,6 @@ package com.itzrozzadev.fo;
 import com.itzrozzadev.fo.collection.expiringmap.ExpiringMap;
 import com.itzrozzadev.fo.exception.FoException;
 import com.itzrozzadev.fo.model.HookManager;
-import com.itzrozzadev.fo.remain.CompRunnable;
 import com.itzrozzadev.fo.remain.Remain;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -160,12 +162,7 @@ public final class EntityUtil {
 		if (flyListener == null && hitGroundListener == null)
 			throw new FoException("Cannot track entity with fly and hit listeners on null!");
 
-		final boolean isProjectile = entity instanceof Projectile;
-
-		if (isProjectile && hitGroundListener != null)
-			HitTracking.addFlyingProjectile((Projectile) entity, event -> hitGroundListener.run());
-
-		Common.runTimer(1, new CompRunnable() {
+		Common.runTimer(1, new BukkitRunnable() {
 
 			private int elapsedTicks = 0;
 
@@ -173,7 +170,7 @@ public final class EntityUtil {
 			public void run() {
 
 				// Cancel after the given timeout to save performance
-				if (elapsedTicks++ > timeoutTicks) {
+				if (this.elapsedTicks++ > timeoutTicks) {
 					cancel();
 
 					return;
@@ -181,7 +178,7 @@ public final class EntityUtil {
 
 				// Cancel when invalid
 				if (entity == null || entity.isDead() || !entity.isValid()) {
-					if (entity instanceof FallingBlock && !isProjectile && hitGroundListener != null)
+					if (entity instanceof FallingBlock && hitGroundListener != null)
 						hitGroundListener.run();
 
 					cancel();
@@ -191,7 +188,7 @@ public final class EntityUtil {
 
 				// Run the hit listener
 				if (entity.isOnGround()) {
-					if (!isProjectile && hitGroundListener != null)
+					if (hitGroundListener != null)
 						hitGroundListener.run();
 
 					cancel();
@@ -237,7 +234,7 @@ class HitTracking implements Listener {
 	 * List of flying projectiles with code to run on impact,
 	 * stop tracking after 30 seconds to prevent overloading the map
 	 */
-	private static final ExpiringMap<UUID, EntityUtil.HitListener> flyingProjectiles = ExpiringMap.builder().expiration(30, TimeUnit.SECONDS).build();
+	private static final ExpiringMap<UUID, List<EntityUtil.HitListener>> flyingProjectiles = ExpiringMap.builder().expiration(30, TimeUnit.SECONDS).build();
 
 	/**
 	 * Invoke the hit listener when the registered projectile hits something
@@ -246,10 +243,13 @@ class HitTracking implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onHit(final ProjectileHitEvent event) {
-		final EntityUtil.HitListener hitListener = flyingProjectiles.remove(event.getEntity().getUniqueId());
+		synchronized (flyingProjectiles) {
+			final List<EntityUtil.HitListener> hitListeners = flyingProjectiles.remove(event.getEntity().getUniqueId());
 
-		if (hitListener != null)
-			hitListener.onHit(event);
+			if (hitListeners != null)
+				for (final EntityUtil.HitListener listener : hitListeners)
+					listener.onHit(event);
+		}
 	}
 
 	/**
@@ -259,6 +259,12 @@ class HitTracking implements Listener {
 	 * @param hitTask
 	 */
 	static void addFlyingProjectile(final Projectile projectile, final EntityUtil.HitListener hitTask) {
-		flyingProjectiles.put(projectile.getUniqueId(), hitTask);
+		synchronized (flyingProjectiles) {
+			final UUID uniqueId = projectile.getUniqueId();
+			final List<EntityUtil.HitListener> listeners = flyingProjectiles.getOrDefault(uniqueId, new ArrayList<>());
+
+			listeners.add(hitTask);
+			flyingProjectiles.put(uniqueId, listeners);
+		}
 	}
 }

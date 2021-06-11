@@ -5,7 +5,6 @@ import com.itzrozzadev.fo.MinecraftVersion;
 import com.itzrozzadev.fo.MinecraftVersion.V;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.event.RocketExplosionEvent;
-import com.itzrozzadev.fo.remain.CompRunnable;
 import com.itzrozzadev.fo.remain.Remain;
 import com.itzrozzadev.fo.settings.SimpleLocalization;
 import lombok.Data;
@@ -22,6 +21,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -125,7 +125,7 @@ public final class ToolsListener implements Listener {
 	 * Handles hotbar focus/defocus for tools
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onHeltItem(final PlayerItemHeldEvent event) {
+	public void onHeldItem(final PlayerItemHeldEvent event) {
 		final Player player = event.getPlayer();
 
 		final Tool current = ToolRegistry.getTool(player.getInventory().getItem(event.getNewSlot()));
@@ -176,13 +176,13 @@ public final class ToolsListener implements Listener {
 		if (!(shooter instanceof Player))
 			return;
 
-		if (shotRockets.containsKey(shot.getUniqueId()))
+		if (this.shotRockets.containsKey(shot.getUniqueId()))
 			return;
 
 		final Player player = (Player) shooter;
 		final Tool tool = ToolRegistry.getTool(player.getItemInHand());
 
-		if (tool != null && tool instanceof Rocket)
+		if (tool instanceof Rocket)
 			try {
 				final Rocket rocket = (Rocket) tool;
 
@@ -211,16 +211,16 @@ public final class ToolsListener implements Listener {
 						final Projectile copy = world.spawn(directedLoc, shot.getClass());
 						copy.setVelocity(shot.getVelocity());
 
-						shotRockets.put(copy.getUniqueId(), new ShotRocket(player, rocket));
+						this.shotRockets.put(copy.getUniqueId(), new ShotRocket(player, rocket));
 						rocket.onLaunch(copy, player);
 
-						Common.runTimer(1, new CompRunnable() {
+						Common.runTimer(1, new BukkitRunnable() {
 
 							private long elapsedTicks = 0;
 
 							@Override
 							public void run() {
-								if (!copy.isValid() || copy.isOnGround() || elapsedTicks++ > 20 * 30 /*Remove after 30 seconds to reduce server strain*/)
+								if (!copy.isValid() || copy.isOnGround() || this.elapsedTicks++ > 20 * 30 /*Remove after 30 seconds to reduce server strain*/)
 									cancel();
 
 								else
@@ -230,7 +230,7 @@ public final class ToolsListener implements Listener {
 					});
 
 				} else {
-					shotRockets.put(shot.getUniqueId(), new ShotRocket(player, rocket));
+					this.shotRockets.put(shot.getUniqueId(), new ShotRocket(player, rocket));
 					rocket.onLaunch(shot, player);
 				}
 
@@ -251,7 +251,7 @@ public final class ToolsListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onRocketHit(final ProjectileHitEvent event) {
 		final Projectile projectile = event.getEntity();
-		final ShotRocket shot = shotRockets.remove(projectile.getUniqueId());
+		final ShotRocket shot = this.shotRockets.remove(projectile.getUniqueId());
 
 		if (shot != null) {
 			final Rocket rocket = shot.getRocket();

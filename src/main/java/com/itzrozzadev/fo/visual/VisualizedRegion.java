@@ -1,23 +1,21 @@
 package com.itzrozzadev.fo.visual;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import com.itzrozzadev.fo.BlockUtil;
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.collection.SerializedMap;
 import com.itzrozzadev.fo.region.Region;
 import com.itzrozzadev.fo.remain.CompParticle;
-import com.itzrozzadev.fo.remain.CompRunnable;
-
 import lombok.Setter;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A simply way to visualize two locations in the world
@@ -72,7 +70,7 @@ public final class VisualizedRegion extends Region {
 	 * @param player
 	 * @param durationTicks
 	 */
-	public void showParticles(Player player, int durationTicks) {
+	public void showParticles(final Player player, final int durationTicks) {
 		showParticles(player);
 
 		Common.runLater(durationTicks, () -> {
@@ -90,9 +88,9 @@ public final class VisualizedRegion extends Region {
 		Valid.checkBoolean(!canSeeParticles(player), "Player " + player.getName() + " already sees region " + this);
 		Valid.checkBoolean(isWhole(), "Cannot show particles of an incomplete region " + this);
 
-		viewers.add(player);
+		this.viewers.add(player);
 
-		if (task == null)
+		if (this.task == null)
 			startVisualizing();
 	}
 
@@ -104,9 +102,9 @@ public final class VisualizedRegion extends Region {
 	public void hideParticles(final Player player) {
 		Valid.checkBoolean(canSeeParticles(player), "Player " + player.getName() + " is not seeing region " + this);
 
-		viewers.remove(player);
+		this.viewers.remove(player);
 
-		if (viewers.isEmpty() && task != null)
+		if (this.viewers.isEmpty() && this.task != null)
 			stopVisualizing();
 	}
 
@@ -117,20 +115,20 @@ public final class VisualizedRegion extends Region {
 	 * @return
 	 */
 	public boolean canSeeParticles(final Player player) {
-		return viewers.contains(player);
+		return this.viewers.contains(player);
 	}
 
 	/*
 	 * Starts visualizing this region if it is whole
 	 */
 	private void startVisualizing() {
-		Valid.checkBoolean(task == null, "Already visualizing region " + this + "!");
+		Valid.checkBoolean(this.task == null, "Already visualizing region " + this + "!");
 		Valid.checkBoolean(isWhole(), "Cannot visualize incomplete region " + this + "!");
 
-		task = Common.runTimer(23, new CompRunnable() {
+		this.task = Common.runTimer(23, new BukkitRunnable() {
 			@Override
 			public void run() {
-				if (viewers.isEmpty()) {
+				if (VisualizedRegion.this.viewers.isEmpty()) {
 					stopVisualizing();
 
 					return;
@@ -139,11 +137,11 @@ public final class VisualizedRegion extends Region {
 				final Set<Location> blocks = BlockUtil.getBoundingBox(getPrimary(), getSecondary());
 
 				for (final Location location : blocks)
-					for (final Player viewer : viewers) {
+					for (final Player viewer : VisualizedRegion.this.viewers) {
 						final Location viewerLocation = viewer.getLocation();
 
 						if (viewerLocation.getWorld().equals(location.getWorld()) && viewerLocation.distance(location) < 100)
-							particle.spawnFor(viewer, location);
+							VisualizedRegion.this.particle.spawnFor(viewer, location);
 					}
 
 			}
@@ -154,12 +152,12 @@ public final class VisualizedRegion extends Region {
 	 * Stops the region from being visualized
 	 */
 	private void stopVisualizing() {
-		Valid.checkNotNull(task, "Region " + this + " not visualized");
+		Valid.checkNotNull(this.task, "Region " + this + " not visualized");
 
-		task.cancel();
-		task = null;
+		this.task.cancel();
+		this.task = null;
 
-		viewers.clear();
+		this.viewers.clear();
 	}
 
 	/**

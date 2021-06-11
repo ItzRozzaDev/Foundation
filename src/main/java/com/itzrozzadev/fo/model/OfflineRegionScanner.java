@@ -8,11 +8,11 @@ import com.itzrozzadev.fo.ReflectionUtil.ReflectionException;
 import com.itzrozzadev.fo.debug.LagCatcher;
 import com.itzrozzadev.fo.event.RegionScanCompleteEvent;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
-import com.itzrozzadev.fo.remain.CompRunnable;
 import com.itzrozzadev.fo.remain.Remain;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -71,11 +71,11 @@ public abstract class OfflineRegionScanner {
 	 *
 	 * @param world
 	 */
-	public final void scan(World world) {
+	public final void scan(final World world) {
 		scan0(world);
 	}
 
-	private void scan0(World world) {
+	private void scan0(final World world) {
 		Thread watchdog = null;
 
 		try {
@@ -134,8 +134,8 @@ public abstract class OfflineRegionScanner {
 	 *
 	 * @param queue
 	 */
-	private void schedule(String worldName, Queue<File> queue) {
-		new CompRunnable() {
+	private void schedule(final String worldName, final Queue<File> queue) {
+		new BukkitRunnable() {
 
 			@Override
 			public void run() {
@@ -147,7 +147,7 @@ public abstract class OfflineRegionScanner {
 					Bukkit.getLogger().info("Region scanner finished.");
 					Bukkit.getLogger().info(Common.consoleLine());
 
-					Common.callEvent(new RegionScanCompleteEvent(world));
+					Common.callEvent(new RegionScanCompleteEvent(OfflineRegionScanner.this.world));
 					onScanFinished();
 
 					cancel();
@@ -166,7 +166,7 @@ public abstract class OfflineRegionScanner {
 	 *
 	 * @param file
 	 */
-	private void scanFile(String worldName, File file) {
+	private void scanFile(final String worldName, final File file) {
 		final Matcher matcher = FILE_PATTERN.matcher(file.getName());
 
 		if (!matcher.matches())
@@ -175,10 +175,10 @@ public abstract class OfflineRegionScanner {
 		final int regionX = Integer.parseInt(matcher.group(1));
 		final int regionZ = Integer.parseInt(matcher.group(2));
 
-		System.out.print("[" + Math.round((double) done++ / (double) totalFiles * 100) + "%] Processing " + file);
+		System.out.print("[" + Math.round((double) this.done++ / (double) this.totalFiles * 100) + "%] Processing " + file);
 
 		// Calculate time, collect memory and increase pauses in between if running out of memory
-		if (System.currentTimeMillis() - lastTick > 4000) {
+		if (System.currentTimeMillis() - this.lastTick > 4000) {
 			final long free = Runtime.getRuntime().freeMemory() / 1_000_000;
 
 			if (free < 200) {
@@ -191,7 +191,7 @@ public abstract class OfflineRegionScanner {
 			} else
 				System.out.print(" [free memory = " + free + " mb]");
 
-			lastTick = System.currentTimeMillis();
+			this.lastTick = System.currentTimeMillis();
 		}
 
 		System.out.println();
@@ -206,7 +206,7 @@ public abstract class OfflineRegionScanner {
 				final int chunkZ = z + (regionZ << 5);
 
 				if (RegionAccessor.isChunkSaved(region, x, z)) {
-					final Chunk chunk = world.getChunkAt(chunkX, chunkZ);
+					final Chunk chunk = this.world.getChunkAt(chunkX, chunkZ);
 
 					onChunkScan(chunk);
 				}
@@ -245,7 +245,7 @@ public abstract class OfflineRegionScanner {
 	 * @param world
 	 * @return
 	 */
-	public static File[] getRegionFiles(World world) {
+	public static File[] getRegionFiles(final World world) {
 		final File regionDir = getRegionDirectory(world);
 
 		return regionDir == null ? null : regionDir.listFiles((FilenameFilter) (dir, name) -> name.toLowerCase().endsWith(".mca"));
@@ -257,7 +257,7 @@ public abstract class OfflineRegionScanner {
 	 * @param world
 	 * @return
 	 */
-	private static File getRegionDirectory(World world) {
+	private static File getRegionDirectory(final World world) {
 		for (final String f : FOLDERS) {
 			final File file = new File(world.getWorldFolder(), f);
 
@@ -275,7 +275,7 @@ public abstract class OfflineRegionScanner {
 	 * @param world
 	 * @return
 	 */
-	public static int getEstimatedWaitTimeSec(World world) {
+	public static int getEstimatedWaitTimeSec(final World world) {
 		final File[] files = getRegionFiles(world);
 
 		return (OPERATION_WAIT_SECONDS + 2) * files.length;
@@ -290,7 +290,10 @@ class RegionAccessor {
 	private static Constructor<?> regionFileConstructor;
 	private static Method isChunkSaved;
 
-	private static boolean atleast1_13, atleast1_14, atleast1_15, atleast1_16;
+	private static final boolean atleast1_13;
+	private static final boolean atleast1_14;
+	private static final boolean atleast1_15;
+	private static final boolean atleast1_16;
 	private static final String saveMethodName;
 
 	static {
@@ -311,7 +314,7 @@ class RegionAccessor {
 		}
 	}
 
-	static Object getRegionFile(String worldName, File file) {
+	static Object getRegionFile(final String worldName, final File file) {
 		try {
 			final File container = new File(Bukkit.getWorldContainer(), worldName);
 
@@ -321,7 +324,7 @@ class RegionAccessor {
 		}
 	}
 
-	static boolean isChunkSaved(Object region, int x, int z) {
+	static boolean isChunkSaved(final Object region, final int x, final int z) {
 		try {
 			if (MinecraftVersion.newerThan(V.v1_13)) {
 				final Object chunkCoordinates = ReflectionUtil.getNMSClass("ChunkCoordIntPair").getConstructor(int.class, int.class).newInstance(x, z);
@@ -336,7 +339,7 @@ class RegionAccessor {
 		}
 	}
 
-	static void save(Object region) {
+	static void save(final Object region) {
 		try {
 			region.getClass().getDeclaredMethod(saveMethodName).invoke(region);
 

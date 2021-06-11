@@ -7,13 +7,13 @@ import com.itzrozzadev.fo.RandomUtil;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.collection.StrictList;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
-import com.itzrozzadev.fo.remain.CompRunnable;
 import com.itzrozzadev.fo.remain.Remain;
 import lombok.*;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
@@ -201,7 +201,7 @@ public class SimpleScoreboard {
 	private final void start() {
 		Valid.checkBoolean(this.updateTask == null, "Scoreboard " + this + " already running");
 
-		this.updateTask = new CompRunnable() {
+		this.updateTask = new BukkitRunnable() {
 			@Override
 			public void run() {
 

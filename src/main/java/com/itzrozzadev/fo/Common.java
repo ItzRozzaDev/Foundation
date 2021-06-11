@@ -11,7 +11,6 @@ import com.itzrozzadev.fo.model.HookManager;
 import com.itzrozzadev.fo.model.Replacer;
 import com.itzrozzadev.fo.plugin.SimplePlugin;
 import com.itzrozzadev.fo.remain.CompChatColor;
-import com.itzrozzadev.fo.remain.CompRunnable;
 import com.itzrozzadev.fo.remain.Remain;
 import com.itzrozzadev.fo.settings.SimpleLocalization;
 import com.itzrozzadev.fo.settings.SimpleSettings;
@@ -480,7 +479,7 @@ public final class Common {
 		} else
 			for (final String part : splitNewline(message)) {
 				final String prefixStripped = removeSurroundingSpaces(tellPrefix);
-				final String prefix = (ADD_TELL_PREFIX && !hasPrefix && !prefixStripped.isEmpty() ? prefixStripped + " " : "");
+				final String prefix = ADD_TELL_PREFIX && !hasPrefix && !prefixStripped.isEmpty() ? prefixStripped + " " : "";
 
 				String toSend;
 
@@ -737,7 +736,7 @@ public final class Common {
 				lastColor = match.group(0);
 
 			if (lastColor != null)
-				if ((c == -1 || c < (message.lastIndexOf(lastColor) + lastColor.length())))
+				if (c == -1 || c < message.lastIndexOf(lastColor) + lastColor.length())
 					return lastColor;
 		}
 
@@ -2324,11 +2323,10 @@ public final class Common {
 	 * @param task
 	 * @return the task or null
 	 */
-	public static BukkitTask runLater(final int delayTicks, Runnable task) {
+	public static BukkitTask runLater(final int delayTicks, final Runnable task) {
 		final BukkitScheduler scheduler = Bukkit.getScheduler();
 		final JavaPlugin instance = SimplePlugin.getInstance();
 
-		task = new CompRunnable.SafeRunnable(task);
 
 		try {
 			return runIfDisabled(task) ? null : delayTicks == 0 ? scheduler.runTask(instance, task) : task instanceof BukkitRunnable ? ((BukkitRunnable) task).runTaskLater(instance, delayTicks) : scheduler.runTaskLater(instance, task, delayTicks);
@@ -2376,11 +2374,10 @@ public final class Common {
 	 * @param task
 	 * @return the task or null
 	 */
-	public static BukkitTask runLaterAsync(final int delayTicks, Runnable task) {
+	public static BukkitTask runLaterAsync(final int delayTicks, final Runnable task) {
 		final BukkitScheduler scheduler = Bukkit.getScheduler();
 		final JavaPlugin instance = SimplePlugin.getInstance();
 
-		task = new CompRunnable.SafeRunnable(task);
 
 		try {
 			return runIfDisabled(task) ? null : delayTicks == 0 ? task instanceof BukkitRunnable ? ((BukkitRunnable) task).runTaskAsynchronously(instance) : scheduler.runTaskAsynchronously(instance, task) : task instanceof BukkitRunnable ? ((BukkitRunnable) task).runTaskLaterAsynchronously(instance, delayTicks) : scheduler.runTaskLaterAsynchronously(instance, task, delayTicks);
@@ -2388,8 +2385,8 @@ public final class Common {
 		} catch (final NoSuchMethodError err) {
 			return runIfDisabled(task) ? null
 					: delayTicks == 0
-					? task instanceof CompRunnable ? ((CompRunnable) task).runTaskAsynchronously(instance) : getTaskFromId(scheduler.scheduleAsyncDelayedTask(instance, task))
-					: task instanceof CompRunnable ? ((CompRunnable) task).runTaskLaterAsynchronously(instance, delayTicks) : getTaskFromId(scheduler.scheduleAsyncDelayedTask(instance, task, delayTicks));
+					? getTaskFromId(scheduler.scheduleAsyncDelayedTask(instance, task))
+					: getTaskFromId(scheduler.scheduleAsyncDelayedTask(instance, task, delayTicks));
 		}
 	}
 
@@ -2412,17 +2409,14 @@ public final class Common {
 	 * @param task        the task
 	 * @return the bukkit task or null if error
 	 */
-	public static BukkitTask runTimer(final int delayTicks, final int repeatTicks, Runnable task) {
+	public static BukkitTask runTimer(final int delayTicks, final int repeatTicks, final Runnable task) {
 
-		task = new CompRunnable.SafeRunnable(task);
 
 		try {
 			return runIfDisabled(task) ? null : task instanceof BukkitRunnable ? ((BukkitRunnable) task).runTaskTimer(SimplePlugin.getInstance(), delayTicks, repeatTicks) : Bukkit.getScheduler().runTaskTimer(SimplePlugin.getInstance(), task, delayTicks, repeatTicks);
 
 		} catch (final NoSuchMethodError err) {
 			return runIfDisabled(task) ? null
-					: task instanceof CompRunnable
-					? ((CompRunnable) task).runTaskTimer(SimplePlugin.getInstance(), delayTicks, repeatTicks)
 					: getTaskFromId(Bukkit.getScheduler().scheduleSyncRepeatingTask(SimplePlugin.getInstance(), task, delayTicks, repeatTicks));
 		}
 	}
@@ -2446,18 +2440,15 @@ public final class Common {
 	 * @param task
 	 * @return
 	 */
-	public static BukkitTask runTimerAsync(final int delayTicks, final int repeatTicks, Runnable task) {
+	public static BukkitTask runTimerAsync(final int delayTicks, final int repeatTicks, final Runnable task) {
 
-		task = new CompRunnable.SafeRunnable(task);
 
 		try {
 			return runIfDisabled(task) ? null : task instanceof BukkitRunnable ? ((BukkitRunnable) task).runTaskTimerAsynchronously(SimplePlugin.getInstance(), delayTicks, repeatTicks) : Bukkit.getScheduler().runTaskTimerAsynchronously(SimplePlugin.getInstance(), task, delayTicks, repeatTicks);
 
 		} catch (final NoSuchMethodError err) {
 			return runIfDisabled(task) ? null
-					: task instanceof CompRunnable
-					? ((CompRunnable) task).runTaskTimerAsynchronously(SimplePlugin.getInstance(), delayTicks, repeatTicks)
-					: getTaskFromId(Bukkit.getScheduler().scheduleAsyncRepeatingTask(SimplePlugin.getInstance(), task, delayTicks, repeatTicks));
+					: getTaskFromId(Bukkit.getScheduler().scheduleSyncRepeatingTask(SimplePlugin.getInstance(), task, delayTicks, repeatTicks));
 		}
 	}
 
@@ -2480,7 +2471,7 @@ public final class Common {
 	// This is fail-safe to critical save-on-exit operations in case our plugin is improperly reloaded (PlugMan) or malfunctions
 	private static boolean runIfDisabled(final Runnable run) {
 		if (!SimplePlugin.getInstance().isEnabled()) {
-			new CompRunnable.SafeRunnable(run).run();
+			run.run();
 
 			return true;
 		}
@@ -2689,22 +2680,22 @@ final class TimedCharSequence implements CharSequence {
 	 */
 	@Override
 	public char charAt(final int index) {
-		return message.charAt(index);
+		return this.message.charAt(index);
 	}
 
 	@Override
 	public int length() {
-		return message.length();
+		return this.message.length();
 	}
 
 	@Override
 	public CharSequence subSequence(final int start, final int end) {
-		return new TimedCharSequence(message.subSequence(start, end), futureTimestampLimit);
+		return new TimedCharSequence(this.message.subSequence(start, end), this.futureTimestampLimit);
 	}
 
 	@Override
 	public String toString() {
-		return message.toString();
+		return this.message.toString();
 	}
 
 	/**

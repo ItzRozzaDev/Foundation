@@ -248,12 +248,13 @@ public final class Lang extends YamlConfig {
 	 * Replace placeholders in the message
 	 */
 	private static String translate(String key, @Nullable final Object... variables) {
+		Valid.checkNotNull(key, "Cannot translate a null key with variables " + Common.join(variables));
 		if (variables != null)
 			for (int i = 0; i < variables.length; i++) {
 				Object variable = variables[i];
 
 				variable = Common.getOrDefaultStrict(SerializeUtil.serialize(variable), SimpleLocalization.NONE);
-				Valid.checkNotNull("Failed to replace {" + i + "} as " + variable + "(raw = " + variables[i] + ")");
+				Valid.checkNotNull(variable, "Failed to replace {" + i + "} as " + variable + "(raw = " + variables[i] + ")");
 
 				key = key.replace("{" + i + "}", variable.toString());
 			}
