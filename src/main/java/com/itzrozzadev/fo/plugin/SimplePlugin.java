@@ -408,8 +408,8 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 											&& Modifier.isStatic(field.getModifiers()) && Modifier.isFinal(field.getModifiers()))
 										instanceField = field;
 
-								if (SimpleEnchantment.class.isAssignableFrom(clazz))
-									Valid.checkNotNull(instanceField, "Your enchant class " + clazz.getSimpleName() + " must be a singleton and have static 'instance' field and private constructors!");
+//								if (SimpleEnchantment.class.isAssignableFrom(clazz))
+//									Valid.checkNotNull(instanceField, "Your enchant class " + clazz.getSimpleName() + " must be a singleton and have static 'instance' field and private constructors!");
 
 								if (instanceField != null) {
 									instanceField.setAccessible(true);
