@@ -57,7 +57,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 *
 	 * @param name
 	 */
-	protected SimpleEnchantment(String name, int maxLevel) {
+	protected SimpleEnchantment(final String name, final int maxLevel) {
 		super(toKey(name));
 
 		this.name = name;
@@ -89,7 +89,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param damager
 	 * @param event
 	 */
-	protected void onDamage(int level, LivingEntity damager, EntityDamageByEntityEvent event) {
+	protected void onDamage(final int level, final LivingEntity damager, final EntityDamageByEntityEvent event) {
 	}
 
 	/**
@@ -98,7 +98,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param level
 	 * @param event
 	 */
-	protected void onInteract(int level, PlayerInteractEvent event) {
+	protected void onInteract(final int level, final PlayerInteractEvent event) {
 	}
 
 	/**
@@ -107,7 +107,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param level
 	 * @param event
 	 */
-	protected void onBreakBlock(int level, BlockBreakEvent event) {
+	protected void onBreakBlock(final int level, final BlockBreakEvent event) {
 	}
 
 	/**
@@ -118,7 +118,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param shooter
 	 * @param event
 	 */
-	protected void onShoot(int level, LivingEntity shooter, ProjectileLaunchEvent event) {
+	protected void onShoot(final int level, final LivingEntity shooter, final ProjectileLaunchEvent event) {
 	}
 
 	/**
@@ -129,7 +129,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param shooter
 	 * @param event
 	 */
-	protected void onHit(int level, LivingEntity shooter, ProjectileHitEvent event) {
+	protected void onHit(final int level, final LivingEntity shooter, final ProjectileHitEvent event) {
 	}
 
 	// ------------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param level
 	 * @return
 	 */
-	public ItemStack applyTo(ItemStack item, int level) {
+	public ItemStack applyTo(final ItemStack item, final int level) {
 		final ItemMeta meta = item.getItemMeta();
 
 		meta.addEnchant(this, level, true);
@@ -166,8 +166,8 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param level
 	 * @return
 	 */
-	public String getLore(int level) {
-		return name + " " + MathUtil.toRoman(level);
+	public String getLore(final int level) {
+		return this.name + " " + MathUtil.toRoman(level);
 	}
 
 	/**
@@ -224,7 +224,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @return
 	 */
 	@Override
-	public boolean conflictsWith(Enchantment other) {
+	public boolean conflictsWith(final Enchantment other) {
 		return false;
 	}
 
@@ -235,7 +235,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @return
 	 */
 	@Override
-	public boolean canEnchantItem(ItemStack item) {
+	public boolean canEnchantItem(final ItemStack item) {
 		return true;
 	}
 
@@ -276,7 +276,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 */
 	@Override
 	public final int getMaxLevel() {
-		return maxLevel;
+		return this.maxLevel;
 	}
 
 	/**
@@ -286,7 +286,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 */
 	@Override
 	public final String getName() {
-		return name;
+		return this.name;
 	}
 
 	// ------------------------------------------------------------------------------------------
@@ -299,7 +299,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @param item
 	 * @return
 	 */
-	public static Map<SimpleEnchantment, Integer> findEnchantments(ItemStack item) {
+	public static Map<SimpleEnchantment, Integer> findEnchantments(final ItemStack item) {
 		final Map<SimpleEnchantment, Integer> map = new HashMap<>();
 
 		if (item == null)
@@ -341,7 +341,7 @@ public abstract class SimpleEnchantment extends Enchantment {
 	 * @deprecated internal use only
 	 */
 	@Deprecated
-	public static ItemStack addEnchantmentLores(ItemStack item) {
+	public static ItemStack addEnchantmentLores(final ItemStack item) {
 		final List<String> customEnchants = new ArrayList<>();
 
 		// Fill in our enchants
@@ -361,12 +361,15 @@ public abstract class SimpleEnchantment extends Enchantment {
 		if (!customEnchants.isEmpty()) {
 			final ItemMeta meta = item.hasItemMeta() ? item.getItemMeta() : Bukkit.getItemFactory().getItemMeta(item.getType());
 			final List<String> originalLore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-			final List<String> finalLore = new ArrayList<>();
 
 			final List<String> colorlessOriginals = new ArrayList<>();
 
 			for (final String original : originalLore)
 				colorlessOriginals.add(ChatColor.stripColor(Common.colorize(original)));
+
+
+			// Place the original lore at the bottom
+			final List<String> finalLore = new ArrayList<>(originalLore);
 
 			// Place our enchants
 			for (final String customEnchant : customEnchants) {
@@ -375,9 +378,6 @@ public abstract class SimpleEnchantment extends Enchantment {
 				if (!colorlessOriginals.contains(colorlessEnchant))
 					finalLore.add(customEnchant);
 			}
-
-			// Place the original lore at the bottom
-			finalLore.addAll(originalLore);
 
 			// Set the lore
 			meta.setLore(finalLore);
