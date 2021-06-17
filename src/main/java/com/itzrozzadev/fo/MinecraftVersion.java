@@ -24,7 +24,7 @@ public final class MinecraftVersion {
 	 * The version wrapper
 	 */
 	public enum V {
-		v1_18(17, false),
+		v1_18(18, false),
 		v1_17(17),
 		v1_16(16),
 		v1_15(15),
