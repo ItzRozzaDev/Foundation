@@ -1,6 +1,7 @@
 package com.itzrozzadev.fo.menu.model;
 
 import com.itzrozzadev.fo.Common;
+import com.itzrozzadev.fo.MinecraftVersion;
 import com.itzrozzadev.fo.PlayerUtil;
 import com.itzrozzadev.fo.menu.Menu;
 import com.itzrozzadev.fo.remain.CompMaterial;
@@ -136,17 +137,22 @@ public final class InventoryDrawer {
 	public void display(final Player player) {
 		final Inventory inv = this.build(player);
 		final Menu menu = Menu.getMenu(player);
-		// Before opening make sure we close his old inventory if exist
-		if (player.getOpenInventory() != null && menu != null) {
-			//Check for a new bigger menu - This will open a new menu instead of setting the contents of the current one
-			if (menu.getSize() == getSize()) {
-				player.getOpenInventory().getTopInventory().setContents(inv.getContents());
-				PlayerUtil.updateInventoryTitle(player, this.title);
-				player.updateInventory();
-				return;
+		if (MinecraftVersion.olderThan(MinecraftVersion.V.v1_17)) {
+			// Before opening make sure we close his old inventory if exist
+			if (player.getOpenInventory() != null && menu != null) {
+				//Check for a new bigger menu - This will open a new menu instead of setting the contents of the current one
+				if (menu.getSize() == getSize()) {
+					player.getOpenInventory().getTopInventory().setContents(inv.getContents());
+					PlayerUtil.updateInventoryTitle(player, this.title);
+					player.updateInventory();
+				}
 			}
+		} else {
+			if (player.getOpenInventory() != null) {
+				player.closeInventory();
+			}
+			player.openInventory(inv);
 		}
-		player.openInventory(inv);
 	}
 
 	/**
