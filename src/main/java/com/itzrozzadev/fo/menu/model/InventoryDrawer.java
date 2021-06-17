@@ -138,26 +138,17 @@ public final class InventoryDrawer {
 		final Inventory inv = this.build(player);
 		final Menu menu = Menu.getMenu(player);
 		if (MinecraftVersion.olderThan(MinecraftVersion.V.v1_17)) {
-			// Before opening make sure we close his old inventory if exist
 			if (player.getOpenInventory() != null && menu != null) {
 				//Check for a new bigger menu - This will open a new menu instead of setting the contents of the current one
 				if (menu.getSize() == getSize()) {
 					player.getOpenInventory().getTopInventory().setContents(inv.getContents());
 					PlayerUtil.updateInventoryTitle(player, this.title);
 					player.updateInventory();
+					return;
 				}
-			} else {
-				if (player.getOpenInventory() != null) {
-					player.closeInventory();
-				}
-				player.openInventory(inv);
 			}
-		} else {
-			if (player.getOpenInventory() != null) {
-				player.closeInventory();
-			}
-			player.openInventory(inv);
 		}
+		player.openInventory(inv);
 	}
 
 	/**
