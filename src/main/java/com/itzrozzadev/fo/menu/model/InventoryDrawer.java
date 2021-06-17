@@ -146,6 +146,11 @@ public final class InventoryDrawer {
 					PlayerUtil.updateInventoryTitle(player, this.title);
 					player.updateInventory();
 				}
+			} else {
+				if (player.getOpenInventory() != null) {
+					player.closeInventory();
+				}
+				player.openInventory(inv);
 			}
 		} else {
 			if (player.getOpenInventory() != null) {
