@@ -213,7 +213,8 @@ public final class Remain {
 			for (final CompMaterial compMaterial : CompMaterial.values())
 				compMaterial.getMaterial();
 
-			getNMSClass("Entity");
+			if (MinecraftVersion.olderThan(V.v1_17))
+				getNMSClass("Entity");
 
 		} catch (final Throwable t) {
 			Bukkit.getLogger().severe("** COMPATIBILITY TEST FAILED - THIS PLUGIN WILL NOT FUNCTION PROPERLY **");

@@ -4,7 +4,6 @@ package com.itzrozzadev.fo.remain.nbt;
  * Enum of all NBT Types Minecraft contains
  *
  * @author tr7zw
- *
  */
 public enum NBTType {
 	NBTTagEnd(0),
@@ -20,8 +19,8 @@ public enum NBTType {
 	NBTTagList(9),
 	NBTTagCompound(10);
 
-	NBTType(int i) {
-		id = i;
+	NBTType(final int i) {
+		this.id = i;
 	}
 
 	private final int id;
@@ -30,14 +29,14 @@ public enum NBTType {
 	 * @return Id used by Minecraft internally
 	 */
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	/**
 	 * @param id Internal Minecraft id
 	 * @return Enum representing the id, NBTTagEnd for invalide ids
 	 */
-	public static NBTType valueOf(int id) {
+	public static NBTType valueOf(final int id) {
 		for (final NBTType t : values())
 			if (t.getId() == id)
 				return t;

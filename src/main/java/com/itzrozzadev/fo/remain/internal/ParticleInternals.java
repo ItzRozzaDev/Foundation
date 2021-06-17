@@ -1,12 +1,12 @@
 package com.itzrozzadev.fo.remain.internal;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import com.itzrozzadev.fo.MinecraftVersion;
 import com.itzrozzadev.fo.MinecraftVersion.V;
 import com.itzrozzadev.fo.ReflectionUtil;
 import com.itzrozzadev.fo.remain.Remain;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 /**
  * Reflection class to support packet sending of particles
@@ -83,14 +83,16 @@ public enum ParticleInternals {
 	private static Class<?> nmsEnumParticle;
 
 	static {
-		nmsPacketPlayOutParticle = MinecraftVersion.atLeast(V.v1_7) ? ReflectionUtil.getNMSClass("PacketPlayOutWorldParticles") : null;
+		nmsPacketPlayOutParticle = MinecraftVersion.atLeast(V.v1_17)
+				? ReflectionUtil.lookupClass("net.minecraft.network.protocol.game.PacketPlayOutWorldParticles")
+				: MinecraftVersion.atLeast(V.v1_7) ? ReflectionUtil.getNMSClass("PacketPlayOutWorldParticles") : null;
 	}
 
 	//
 
 	private String name;
-	private String enumValue;
-	private boolean hasColor;
+	private final String enumValue;
+	private final boolean hasColor;
 
 	private ParticleInternals(final String particleName, final String enumValue, final boolean hasColor) {
 		this.name = particleName;
@@ -163,7 +165,7 @@ public enum ParticleInternals {
 				if (extra.length > 1)
 					data = extra[1];
 
-				extra = new int[] { id, id | data << 12 };
+				extra = new int[]{id, id | data << 12};
 			}
 
 			try {

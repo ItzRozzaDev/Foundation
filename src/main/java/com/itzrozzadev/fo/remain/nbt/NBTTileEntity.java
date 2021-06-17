@@ -1,5 +1,6 @@
 package com.itzrozzadev.fo.remain.nbt;
 
+import com.itzrozzadev.fo.exception.FoException;
 import org.bukkit.block.BlockState;
 
 /**
@@ -9,7 +10,6 @@ import org.bukkit.block.BlockState;
  * once.
  *
  * @author tr7zw
- *
  */
 public class NBTTileEntity extends NBTCompound {
 
@@ -18,9 +18,9 @@ public class NBTTileEntity extends NBTCompound {
 	/**
 	 * @param tile BlockState from any TileEntity
 	 */
-	public NBTTileEntity(BlockState tile) {
+	public NBTTileEntity(final BlockState tile) {
 		super(null, null);
-		if (tile == null || (WrapperVersion.isAtLeastVersion(WrapperVersion.MC1_8_R3) && !tile.isPlaced())) {
+		if (tile == null || (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_8_R3) && !tile.isPlaced())) {
 			throw new NullPointerException("Tile can't be null/not placed!");
 		}
 		this.tile = tile;
@@ -28,11 +28,35 @@ public class NBTTileEntity extends NBTCompound {
 
 	@Override
 	public Object getCompound() {
-		return NBTReflectionUtil.getTileEntityNBTTagCompound(tile);
+		return NBTReflectionUtil.getTileEntityNBTTagCompound(this.tile);
 	}
 
 	@Override
-	protected void setCompound(Object compound) {
-		NBTReflectionUtil.setTileEntityNBTTagCompound(tile, compound);
+	protected void setCompound(final Object compound) {
+		NBTReflectionUtil.setTileEntityNBTTagCompound(this.tile, compound);
 	}
+
+	/**
+	 * Gets the NBTCompound used by spigots PersistentDataAPI. This method is only
+	 * available for 1.14+!
+	 *
+	 * @return NBTCompound containing the data of the PersistentDataAPI
+	 */
+	public NBTCompound getPersistentDataContainer() {
+
+		if (com.itzrozzadev.fo.MinecraftVersion.olderThan(com.itzrozzadev.fo.MinecraftVersion.V.v1_14))
+			throw new FoException("getPersistentDataContainer requires MC 1.14 or newer");
+
+		if (hasKey("PublicBukkitValues")) {
+			return getCompound("PublicBukkitValues");
+
+		} else {
+			final NBTContainer container = new NBTContainer();
+			container.addCompound("PublicBukkitValues").setString("__nbtapi",
+					"Marker to make the PersistentDataContainer have content");
+			mergeCompound(container);
+			return getCompound("PublicBukkitValues");
+		}
+	}
+
 }

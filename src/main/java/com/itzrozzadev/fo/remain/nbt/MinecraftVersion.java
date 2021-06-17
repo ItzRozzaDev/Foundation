@@ -1,7 +1,6 @@
 package com.itzrozzadev.fo.remain.nbt;
 
 import org.bukkit.Bukkit;
-import com.itzrozzadev.fo.Common;
 
 /**
  * This class acts as the "Brain" of the NBTApi. It contains the main logger for
@@ -9,9 +8,8 @@ import com.itzrozzadev.fo.Common;
  * correctly.
  *
  * @author tr7zw
- *
  */
-enum WrapperVersion {
+enum MinecraftVersion {
 	UNKNOWN(Integer.MAX_VALUE), // Use the newest known mappings
 	MC1_7_R4(174),
 	MC1_8_R3(183),
@@ -26,13 +24,15 @@ enum WrapperVersion {
 	MC1_15_R1(1151),
 	MC1_16_R1(1161),
 	MC1_16_R2(1162),
-	MC1_16_R3(1163);
+	MC1_16_R3(1163),
+	MC1_17_R1(1171);
 
-	private static WrapperVersion version;
+	private static MinecraftVersion version;
+	private static Boolean hasGsonSupport;
 
 	private final int versionId;
 
-	WrapperVersion(int versionId) {
+	MinecraftVersion(final int versionId) {
 		this.versionId = versionId;
 	}
 
@@ -40,7 +40,7 @@ enum WrapperVersion {
 	 * @return A simple comparable Integer, representing the version.
 	 */
 	public int getVersionId() {
-		return versionId;
+		return this.versionId;
 	}
 
 	/**
@@ -49,7 +49,7 @@ enum WrapperVersion {
 	 * @param version The minimum version
 	 * @return
 	 */
-	public static boolean isAtLeastVersion(WrapperVersion version) {
+	public static boolean isAtLeastVersion(final MinecraftVersion version) {
 		return getVersion().getVersionId() >= version.getVersionId();
 	}
 
@@ -59,7 +59,7 @@ enum WrapperVersion {
 	 * @param version The minimum version
 	 * @return
 	 */
-	public static boolean isNewerThan(WrapperVersion version) {
+	public static boolean isNewerThan(final MinecraftVersion version) {
 		return getVersion().getVersionId() > version.getVersionId();
 	}
 
@@ -69,22 +69,30 @@ enum WrapperVersion {
 	 *
 	 * @return The enum for the MinecraftVersion this server is running
 	 */
-	public static WrapperVersion getVersion() {
-		if (version != null)
+	public static MinecraftVersion getVersion() {
+		if (version != null) {
 			return version;
+		}
 
 		final String ver = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
 		try {
-			version = WrapperVersion.valueOf(ver.replace("v", "MC"));
-
+			version = MinecraftVersion.valueOf(ver.replace("v", "MC"));
 		} catch (final IllegalArgumentException ex) {
-			version = WrapperVersion.UNKNOWN;
+			version = MinecraftVersion.UNKNOWN;
 		}
-
-		if (version == UNKNOWN)
-			Common.log("[NBTAPI] Wasn't able to find NMS Support! Some functions may not work!");
 
 		return version;
 	}
+
+	/**
+	 * @return True, if Gson is usable
+	 */
+	public static boolean hasGsonSupport() {
+		if (hasGsonSupport != null)
+			return hasGsonSupport;
+
+		return hasGsonSupport;
+	}
+
 }

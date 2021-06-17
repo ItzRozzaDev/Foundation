@@ -2,14 +2,11 @@ package com.itzrozzadev.fo.remain.nbt;
 
 import java.io.InputStream;
 
-import com.itzrozzadev.fo.exception.FoException;
-
 /**
  * A Standalone {@link NBTCompound} implementation. All data is just kept inside
  * this Object.
  *
  * @author tr7zw
- *
  */
 public class NBTContainer extends NBTCompound {
 
@@ -20,7 +17,7 @@ public class NBTContainer extends NBTCompound {
 	 */
 	public NBTContainer() {
 		super(null, null);
-		nbt = WrapperObject.NMS_NBTTAGCOMPOUND.getInstance();
+		this.nbt = ObjectCreator.NMS_NBTTAGCOMPOUND.getInstance();
 	}
 
 	/**
@@ -28,13 +25,13 @@ public class NBTContainer extends NBTCompound {
 	 *
 	 * @param nbt
 	 */
-	public NBTContainer(Object nbt) {
+	public NBTContainer(final Object nbt) {
 		super(null, null);
 		if (nbt == null) {
 			throw new NullPointerException("The NBT-Object can't be null!");
 		}
-		if (!WrapperClass.NMS_NBTTAGCOMPOUND.getClazz().isAssignableFrom(nbt.getClass())) {
-			throw new FoException("The object '" + nbt.getClass() + "' is not a valid NBT-Object!");
+		if (!ClassWrapper.NMS_NBTTAGCOMPOUND.getClazz().isAssignableFrom(nbt.getClass())) {
+			throw new NbtApiException("The object '" + nbt.getClass() + "' is not a valid NBT-Object!");
 		}
 		this.nbt = nbt;
 	}
@@ -44,7 +41,7 @@ public class NBTContainer extends NBTCompound {
 	 *
 	 * @param inputsteam
 	 */
-	public NBTContainer(InputStream inputsteam) {
+	public NBTContainer(final InputStream inputsteam) {
 		super(null, null);
 		this.nbt = NBTReflectionUtil.readNBT(inputsteam);
 	}
@@ -55,26 +52,25 @@ public class NBTContainer extends NBTCompound {
 	 *
 	 * @param nbtString
 	 */
-	public NBTContainer(String nbtString) {
+	public NBTContainer(final String nbtString) {
 		super(null, null);
 		if (nbtString == null) {
 			throw new NullPointerException("The String can't be null!");
 		}
 		try {
-			nbt = WrapperReflection.PARSE_NBT.run(null, nbtString);
+			this.nbt = ReflectionMethod.PARSE_NBT.run(null, nbtString);
 		} catch (final Exception ex) {
-			throw new FoException(ex, "Unable to parse a malformed json!");
+			throw new NbtApiException("Unable to parse Malformed Json!", ex);
 		}
 	}
 
 	@Override
 	public Object getCompound() {
-		return nbt;
+		return this.nbt;
 	}
 
 	@Override
-	public void setCompound(Object tag) {
-		nbt = tag;
+	public void setCompound(final Object tag) {
+		this.nbt = tag;
 	}
-
 }

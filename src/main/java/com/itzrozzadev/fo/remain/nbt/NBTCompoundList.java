@@ -1,17 +1,15 @@
 package com.itzrozzadev.fo.remain.nbt;
 
 import org.apache.commons.lang.NotImplementedException;
-import com.itzrozzadev.fo.exception.FoException;
 
 /**
  * {@link NBTListCompound} implementation for NBTLists
  *
  * @author tr7zw
- *
  */
 public class NBTCompoundList extends NBTList<NBTListCompound> {
 
-	protected NBTCompoundList(NBTCompound owner, String name, NBTType type, Object list) {
+	protected NBTCompoundList(final NBTCompound owner, final String name, final NBTType type, final Object list) {
 		super(owner, name, type, list);
 	}
 
@@ -31,13 +29,13 @@ public class NBTCompoundList extends NBTList<NBTListCompound> {
 	 * @param comp
 	 * @return
 	 */
-	public NBTCompound addCompound(NBTCompound comp) {
+	public NBTCompound addCompound(final NBTCompound comp) {
 		try {
-			final Object compound = WrapperClass.NMS_NBTTAGCOMPOUND.getClazz().newInstance();
-			if (WrapperVersion.getVersion().getVersionId() >= WrapperVersion.MC1_14_R1.getVersionId()) {
-				WrapperReflection.LIST_ADD.run(listObject, size(), compound);
+			final Object compound = ClassWrapper.NMS_NBTTAGCOMPOUND.getClazz().newInstance();
+			if (MinecraftVersion.getVersion().getVersionId() >= MinecraftVersion.MC1_14_R1.getVersionId()) {
+				ReflectionMethod.LIST_ADD.run(this.listObject, size(), compound);
 			} else {
-				WrapperReflection.LEGACY_LIST_ADD.run(listObject, compound);
+				ReflectionMethod.LEGACY_LIST_ADD.run(this.listObject, compound);
 			}
 			getParent().saveCompound();
 			final NBTListCompound listcomp = new NBTListCompound(this, compound);
@@ -46,59 +44,58 @@ public class NBTCompoundList extends NBTList<NBTListCompound> {
 			}
 			return listcomp;
 		} catch (final Exception ex) {
-			throw new FoException(ex);
+			throw new NbtApiException(ex);
 		}
 	}
 
 	/**
 	 * Adds a new Compound to the end of the List.
 	 *
-	 *
-	 * @deprecated Please use addCompound!
 	 * @param empty
 	 * @return True, if compound was added
+	 * @deprecated Please use addCompound!
 	 */
 	@Override
 	@Deprecated
-	public boolean add(NBTListCompound empty) {
+	public boolean add(final NBTListCompound empty) {
 		return addCompound(empty) != null;
 	}
 
 	@Override
-	public void add(int index, NBTListCompound element) {
+	public void add(final int index, final NBTListCompound element) {
 		if (element != null) {
 			throw new NotImplementedException("You need to pass null! ListCompounds from other lists won't work.");
 		}
 		try {
-			final Object compound = WrapperClass.NMS_NBTTAGCOMPOUND.getClazz().newInstance();
-			if (WrapperVersion.getVersion().getVersionId() >= WrapperVersion.MC1_14_R1.getVersionId()) {
-				WrapperReflection.LIST_ADD.run(listObject, index, compound);
+			final Object compound = ClassWrapper.NMS_NBTTAGCOMPOUND.getClazz().newInstance();
+			if (MinecraftVersion.getVersion().getVersionId() >= MinecraftVersion.MC1_14_R1.getVersionId()) {
+				ReflectionMethod.LIST_ADD.run(this.listObject, index, compound);
 			} else {
-				WrapperReflection.LEGACY_LIST_ADD.run(listObject, compound);
+				ReflectionMethod.LEGACY_LIST_ADD.run(this.listObject, compound);
 			}
 			super.getParent().saveCompound();
 		} catch (final Exception ex) {
-			throw new FoException(ex);
+			throw new NbtApiException(ex);
 		}
 	}
 
 	@Override
-	public NBTListCompound get(int index) {
+	public NBTListCompound get(final int index) {
 		try {
-			final Object compound = WrapperReflection.LIST_GET_COMPOUND.run(listObject, index);
+			final Object compound = ReflectionMethod.LIST_GET_COMPOUND.run(this.listObject, index);
 			return new NBTListCompound(this, compound);
 		} catch (final Exception ex) {
-			throw new FoException(ex);
+			throw new NbtApiException(ex);
 		}
 	}
 
 	@Override
-	public NBTListCompound set(int index, NBTListCompound element) {
+	public NBTListCompound set(final int index, final NBTListCompound element) {
 		throw new NotImplementedException("This method doesn't work in the ListCompound context.");
 	}
 
 	@Override
-	protected Object asTag(NBTListCompound object) {
+	protected Object asTag(final NBTListCompound object) {
 		return null;
 	}
 

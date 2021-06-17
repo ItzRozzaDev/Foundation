@@ -1,5 +1,6 @@
 package com.itzrozzadev.fo.remain.nbt;
 
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,7 +10,6 @@ import java.io.IOException;
  * {@link NBTCompound} implementation backed by a {@link File}
  *
  * @author tr7zw
- *
  */
 public class NBTFile extends NBTCompound {
 
@@ -23,7 +23,7 @@ public class NBTFile extends NBTCompound {
 	 * @param file
 	 * @throws IOException
 	 */
-	public NBTFile(File file) throws IOException {
+	public NBTFile(final File file) throws IOException {
 		super(null, null);
 		if (file == null) {
 			throw new NullPointerException("File can't be null!");
@@ -31,9 +31,9 @@ public class NBTFile extends NBTCompound {
 		this.file = file;
 		if (file.exists()) {
 			final FileInputStream inputsteam = new FileInputStream(file);
-			nbt = NBTReflectionUtil.readNBT(inputsteam);
+			this.nbt = NBTReflectionUtil.readNBT(inputsteam);
 		} else {
-			nbt = WrapperObject.NMS_NBTTAGCOMPOUND.getInstance();
+			this.nbt = ObjectCreator.NMS_NBTTAGCOMPOUND.getInstance();
 			save();
 		}
 	}
@@ -46,13 +46,13 @@ public class NBTFile extends NBTCompound {
 	public void save() throws IOException {
 		try {
 			getWriteLock().lock();
-			if (!file.exists()) {
-				file.getParentFile().mkdirs();
-				if (!file.createNewFile())
-					throw new IOException("Unable to create file at " + file.getAbsolutePath());
+			if (!this.file.exists()) {
+				this.file.getParentFile().mkdirs();
+				if (!this.file.createNewFile())
+					throw new IOException("Unable to create file at " + this.file.getAbsolutePath());
 			}
-			final FileOutputStream outStream = new FileOutputStream(file);
-			NBTReflectionUtil.writeNBT(nbt, outStream);
+			final FileOutputStream outStream = new FileOutputStream(this.file);
+			NBTReflectionUtil.writeNBT(this.nbt, outStream);
 		} finally {
 			getWriteLock().unlock();
 		}
@@ -62,17 +62,16 @@ public class NBTFile extends NBTCompound {
 	 * @return The File used to store the data
 	 */
 	public File getFile() {
-		return file;
+		return this.file;
 	}
 
 	@Override
 	public Object getCompound() {
-		return nbt;
+		return this.nbt;
 	}
 
 	@Override
-	protected void setCompound(Object compound) {
-		nbt = compound;
+	protected void setCompound(final Object compound) {
+		this.nbt = compound;
 	}
-
 }
