@@ -1,11 +1,11 @@
 package com.itzrozzadev.fo.remain.internal;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
+import com.itzrozzadev.fo.ReflectionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
-import com.itzrozzadev.fo.ReflectionUtil;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * Represents a fake dragon entity for Minecraft 1.6.x
@@ -14,17 +14,16 @@ class v1_6 extends EnderDragonEntity {
 
 	private static final Integer EntityID = 6000;
 
-	public v1_6(String name, Location loc) {
+	public v1_6(final String name, final Location loc) {
 		super(name, loc);
 	}
 
 	@Override
 	public Object getSpawnPacket() {
-		final Class<?> mob_class = ReflectionUtil.getNMSClass("Packet24MobSpawn");
+		final Class<?> mob_class = ReflectionUtil.getNMSClass("Packet24MobSpawn", "N/A");
 		Object mobPacket = null;
 		try {
 			mobPacket = mob_class.newInstance();
-
 			final Field a = ReflectionUtil.getDeclaredField(mob_class, "a");
 			a.setAccessible(true);
 			a.set(mobPacket, EntityID);// Entity ID
@@ -73,14 +72,14 @@ class v1_6 extends EnderDragonEntity {
 
 	@Override
 	public Object getDestroyPacket() {
-		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet29DestroyEntity");
+		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet29DestroyEntity", "N/A");
 		Object packet = null;
 		try {
 			packet = packet_class.newInstance();
 
 			final Field a = ReflectionUtil.getDeclaredField(packet_class, "a");
 			a.setAccessible(true);
-			a.set(packet, new int[] { EntityID });
+			a.set(packet, new int[]{EntityID});
 		} catch (final ReflectiveOperationException e) {
 			e.printStackTrace();
 		}
@@ -89,8 +88,8 @@ class v1_6 extends EnderDragonEntity {
 	}
 
 	@Override
-	public Object getMetaPacket(Object watcher) {
-		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet40EntityMetadata");
+	public Object getMetaPacket(final Object watcher) {
+		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet40EntityMetadata", "N/A");
 		Object packet = null;
 		try {
 			packet = packet_class.newInstance();
@@ -111,8 +110,8 @@ class v1_6 extends EnderDragonEntity {
 	}
 
 	@Override
-	public Object getTeleportPacket(Location loc) {
-		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet34EntityTeleport");
+	public Object getTeleportPacket(final Location loc) {
+		final Class<?> packet_class = ReflectionUtil.getNMSClass("Packet34EntityTeleport", "N/A");
 		Object packet = null;
 		try {
 			packet = packet_class.newInstance();
@@ -143,7 +142,7 @@ class v1_6 extends EnderDragonEntity {
 
 	@Override
 	public Object getWatcher() {
-		final Class<?> watcher_class = ReflectionUtil.getNMSClass("DataWatcher");
+		final Class<?> watcher_class = ReflectionUtil.getNMSClass("DataWatcher", "N/A");
 		Object watcher = null;
 		try {
 			watcher = watcher_class.newInstance();
@@ -152,10 +151,10 @@ class v1_6 extends EnderDragonEntity {
 			a.setAccessible(true);
 
 			a.invoke(watcher, 0, isVisible() ? (byte) 0 : (byte) 0x20);
-			a.invoke(watcher, 6, health);
+			a.invoke(watcher, 6, this.health);
 			a.invoke(watcher, 7, 0);
 			a.invoke(watcher, 8, (byte) 0);
-			a.invoke(watcher, 10, name);
+			a.invoke(watcher, 10, this.name);
 			a.invoke(watcher, 11, (byte) 1);
 		} catch (final ReflectiveOperationException e) {
 			e.printStackTrace();

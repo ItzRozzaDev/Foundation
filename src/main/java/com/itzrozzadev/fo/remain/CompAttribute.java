@@ -1,19 +1,18 @@
 package com.itzrozzadev.fo.remain;
 
-import java.lang.reflect.Method;
-
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import com.itzrozzadev.fo.MinecraftVersion;
 import com.itzrozzadev.fo.MinecraftVersion.V;
 import com.itzrozzadev.fo.ReflectionUtil;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.exception.FoException;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+
+import java.lang.reflect.Method;
 
 /**
  * Wrapper for {@link Attribute}
@@ -116,7 +115,7 @@ public enum CompAttribute {
 	 * @return true if this attribute existed in MC 1.8.9
 	 */
 	public final boolean hasLegacy() {
-		return genericFieldName != null;
+		return this.genericFieldName != null;
 	}
 
 	/**
@@ -131,7 +130,7 @@ public enum CompAttribute {
 
 			return instance != null ? instance.getBaseValue() : null;
 
-		} catch (IllegalArgumentException | NoSuchMethodError | NoClassDefFoundError ex) {
+		} catch (final IllegalArgumentException | NoSuchMethodError | NoClassDefFoundError ex) {
 			try {
 				return hasLegacy() ? getLegacy(entity) : null;
 
@@ -161,7 +160,7 @@ public enum CompAttribute {
 			final AttributeInstance instance = entity.getAttribute(Attribute.valueOf(toString()));
 
 			instance.setBaseValue(value);
-		} catch (NullPointerException | NoSuchMethodError | NoClassDefFoundError ex) {
+		} catch (final NullPointerException | NoSuchMethodError | NoClassDefFoundError ex) {
 			try {
 				if (hasLegacy())
 					setLegacy(entity, value);
@@ -192,7 +191,7 @@ public enum CompAttribute {
 	private Object getLegacyAttributeInstance(final Entity entity) {
 		final Object nmsEntity = ReflectionUtil.invoke("getHandle", entity);
 
-		final Class<?> genericAttribute = ReflectionUtil.getNMSClass("GenericAttributes");
+		final Class<?> genericAttribute = ReflectionUtil.getNMSClass("GenericAttributes", "net.minecraft.world.entity.ai.attributes.GenericAttributes");
 		Object iAttribute;
 
 		try {
@@ -201,8 +200,8 @@ public enum CompAttribute {
 			iAttribute = ReflectionUtil.getStaticFieldContent(genericAttribute, this.minecraftName);
 		}
 
-		final Class<?> nmsLiving = ReflectionUtil.getNMSClass("EntityLiving");
-		final Method method = ReflectionUtil.getMethod(nmsLiving, "getAttributeInstance", ReflectionUtil.getNMSClass("IAttribute"));
+		final Class<?> nmsLiving = ReflectionUtil.getNMSClass("EntityLiving", "N/A");
+		final Method method = ReflectionUtil.getMethod(nmsLiving, "getAttributeInstance", ReflectionUtil.getNMSClass("IAttribute", "N/A"));
 
 		final Object ret = ReflectionUtil.invoke(method, nmsEntity, iAttribute);
 

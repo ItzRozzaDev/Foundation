@@ -1,7 +1,10 @@
 package com.itzrozzadev.fo.remain;
 
-import java.lang.reflect.Method;
-
+import com.itzrozzadev.fo.MinecraftVersion;
+import com.itzrozzadev.fo.MinecraftVersion.V;
+import com.itzrozzadev.fo.ReflectionUtil;
+import com.itzrozzadev.fo.exception.FoException;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -9,12 +12,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import com.itzrozzadev.fo.MinecraftVersion;
-import com.itzrozzadev.fo.MinecraftVersion.V;
-import com.itzrozzadev.fo.ReflectionUtil;
-import com.itzrozzadev.fo.exception.FoException;
 
-import lombok.Getter;
+import java.lang.reflect.Method;
 
 /**
  * Advanced spawning of entities, enables manipulation of
@@ -79,7 +78,7 @@ public final class NmsEntity {
 	//
 	private Object createEntity(final Location location, final Class<?> entityClass) {
 		try {
-			return NmsAccessor.createEntity.invoke(bukkitWorld, location, entityClass);
+			return NmsAccessor.createEntity.invoke(this.bukkitWorld, location, entityClass);
 
 		} catch (final ReflectiveOperationException e) {
 			throw new FoException(e, "Error creating entity " + entityClass + " at " + location);
@@ -96,10 +95,10 @@ public final class NmsEntity {
 	public <T extends Entity> T addEntity(final SpawnReason reason) {
 		try {
 
-			return (T) NmsAccessor.addEntity(bukkitWorld, nmsEntity, reason);
+			return (T) NmsAccessor.addEntity(this.bukkitWorld, this.nmsEntity, reason);
 
 		} catch (final ReflectiveOperationException e) {
-			throw new FoException(e, "Error creating entity " + nmsEntity + " for " + reason);
+			throw new FoException(e, "Error creating entity " + this.nmsEntity + " for " + reason);
 		}
 	}
 
@@ -110,10 +109,10 @@ public final class NmsEntity {
 	 */
 	public Entity getBukkitEntity() {
 		try {
-			return (Entity) NmsAccessor.getBukkitEntity.invoke(nmsEntity);
+			return (Entity) NmsAccessor.getBukkitEntity.invoke(this.nmsEntity);
 
 		} catch (final ReflectiveOperationException e) {
-			throw new FoException(e, "Error getting bukkit entity from " + nmsEntity);
+			throw new FoException(e, "Error getting bukkit entity from " + this.nmsEntity);
 		}
 	}
 }
@@ -146,7 +145,7 @@ final class NmsAccessor {
 	/**
 	 * Is the current Minecraft version older than 1.8.8 ?
 	 */
-	private static volatile boolean olderThan18;
+	private static final boolean olderThan18;
 
 	/**
 	 * Static block initializer
@@ -159,7 +158,7 @@ final class NmsAccessor {
 	 */
 	static {
 		try {
-			final Class<?> nmsEntity = ReflectionUtil.getNMSClass("Entity");
+			final Class<?> nmsEntity = ReflectionUtil.getNMSClass("Entity", "net.minecraft.world.entity.Entity");
 			final Class<?> ofcWorld = ReflectionUtil.getOBCClass("CraftWorld");
 
 			olderThan18 = MinecraftVersion.olderThan(V.v1_8);
@@ -174,7 +173,7 @@ final class NmsAccessor {
 			} else if (MinecraftVersion.newerThan(V.v1_7))
 				addEntity = ofcWorld.getDeclaredMethod("addEntity", nmsEntity, SpawnReason.class);
 			else
-				addEntity = ReflectionUtil.getNMSClass("World").getDeclaredMethod("addEntity", nmsEntity, SpawnReason.class);
+				addEntity = ReflectionUtil.getNMSClass("World", "net.minecraft.world.level.World").getDeclaredMethod("addEntity", nmsEntity, SpawnReason.class);
 
 		} catch (final ReflectiveOperationException ex) {
 			throw new FoException(ex, "Error setting up nms entity accessor!");

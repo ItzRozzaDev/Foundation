@@ -153,8 +153,6 @@ public final class InventoryDrawer {
 
 	/**
 	 * Builds the inventory
-	 *
-	 * @return
 	 */
 	public Inventory build() {
 		return this.build(null);
