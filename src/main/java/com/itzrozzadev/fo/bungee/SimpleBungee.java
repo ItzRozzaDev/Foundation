@@ -1,11 +1,12 @@
 package com.itzrozzadev.fo.bungee;
 
-import java.lang.reflect.Constructor;
-
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.Valid;
-
+import com.itzrozzadev.fo.bungee.message.IncomingMessage;
 import lombok.Getter;
+import org.bukkit.entity.Player;
+
+import java.lang.reflect.Constructor;
 
 /**
  * A unified way of combining Bungee channel, listener and action
@@ -35,11 +36,11 @@ public final class SimpleBungee {
 	 * @param listenerClass
 	 * @param actionEnum
 	 */
-	public SimpleBungee(String channel, Class<? extends BungeeListener> listenerClass, Class<? extends BungeeAction> actionEnum) {
+	public SimpleBungee(final String channel, final Class<? extends BungeeListener> listenerClass, final Class<? extends BungeeAction> actionEnum) {
 		this(channel, toListener(listenerClass), toAction(actionEnum));
 	}
 
-	private static BungeeListener toListener(Class<? extends BungeeListener> listenerClass) {
+	private static BungeeListener toListener(final Class<? extends BungeeListener> listenerClass) {
 		Valid.checkNotNull(listenerClass);
 
 		try {
@@ -55,7 +56,7 @@ public final class SimpleBungee {
 		}
 	}
 
-	private static BungeeAction[] toAction(Class<? extends BungeeAction> actionEnum) {
+	private static BungeeAction[] toAction(final Class<? extends BungeeAction> actionEnum) {
 		Valid.checkNotNull(actionEnum);
 		Valid.checkBoolean(actionEnum.isEnum(), "Enum expected, given: " + actionEnum);
 
@@ -77,7 +78,7 @@ public final class SimpleBungee {
 	 * @param listener
 	 * @param actions
 	 */
-	public SimpleBungee(String channel, BungeeListener listener, BungeeAction... actions) {
+	public SimpleBungee(final String channel, final BungeeListener listener, final BungeeAction... actions) {
 		Valid.checkNotNull(channel, "Channel cannot be null!");
 
 		this.channel = channel;
@@ -86,4 +87,14 @@ public final class SimpleBungee {
 		Valid.checkNotNull(actions, "Actions cannot be null!");
 		this.actions = actions;
 	}
+
+	public SimpleBungee(final String channel) {
+		this(channel, new BungeeListener() {
+			@Override
+			public void onMessageReceived(final Player player, final IncomingMessage incomingMessage) {
+
+			}
+		});
+	}
+
 }

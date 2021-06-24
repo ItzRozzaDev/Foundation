@@ -54,7 +54,7 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 	 *
 	 * @param event
 	 */
-	public SimpleListener(Class<T> event) {
+	public SimpleListener(final Class<T> event) {
 		this(event, EventPriority.NORMAL);
 	}
 
@@ -64,17 +64,17 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 	 * @param event
 	 * @param priority
 	 */
-	public SimpleListener(Class<T> event, EventPriority priority) {
+	public SimpleListener(final Class<T> event, final EventPriority priority) {
 		this(event, priority, true);
 	}
 
 	@Override
-	public final void execute(Listener listener, Event event) throws EventException {
+	public final void execute(final Listener listener, final Event event) throws EventException {
 
 		if (!event.getClass().equals(this.eventClass))
 			return;
 
-		final String logName = listener.getClass().getSimpleName() + " listening to " + event.getEventName() + " at " + priority + " priority";
+		final String logName = listener.getClass().getSimpleName() + " listening to " + event.getEventName() + " at " + this.priority + " priority";
 
 		LagCatcher.start(logName);
 
@@ -137,55 +137,54 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 
 	/**
 	 * If the object is null, stop your code from further execution, cancel the event and
-	 * send the player a null message (see {@link #findPlayer(Event)})
+	 * send the player a null message (see {#findPlayer(Event)})
 	 *
 	 * @param toCheck
-	 * @param falseMessages
 	 */
-	protected final void checkNotNull(Object toCheck, String... nullMessages) {
+	protected final void checkNotNull(final Object toCheck, final String... nullMessages) {
 		checkBoolean(toCheck != null, nullMessages);
 	}
 
 	/**
 	 * If the condition is false, stop your code from further execution, cancel the event and
-	 * send the player a false message (see {@link #findPlayer(Event)})
+	 * send the player a false message (see { #findPlayer(Event)})
 	 *
 	 * @param condition
 	 * @param falseMessages
 	 */
-	protected final void checkBoolean(boolean condition, String... falseMessages) {
+	protected final void checkBoolean(final boolean condition, final String... falseMessages) {
 		if (!condition)
 			throw new EventHandledException(true, falseMessages);
 	}
 
 	/**
-	 * Stop code from executing and send the player a message (see {@link #findPlayer(Event)})
+	 * Stop code from executing and send the player a message (see {#findPlayer(Event)})
 	 * when he lacks the given permission
 	 *
 	 * @param permission
 	 */
-	protected final void checkPerm(String permission) {
+	protected final void checkPerm(final String permission) {
 		checkPerm(permission, SimpleLocalization.NO_PERMISSION);
 	}
 
 	/**
-	 * Return if the {@link #findPlayer(Event)} player has the given permission;
+	 * Return if the { #findPlayer(Event)} player has the given permission;
 	 *
 	 * @param permission
 	 * @return
 	 */
-	protected final boolean hasPerm(String permission) {
+	protected final boolean hasPerm(final String permission) {
 		return PlayerUtil.hasPerm(findPlayer(), permission);
 	}
 
 	/**
-	 * Stop code from executing and send the player a message (see {@link #findPlayer(Event)})
+	 * Stop code from executing and send the player a message (see { #findPlayer(Event)})
 	 * when he lacks the given permission
 	 *
 	 * @param permission
 	 * @param falseMessage
 	 */
-	protected final void checkPerm(String permission, String falseMessage) {
+	protected final void checkPerm(final String permission, final String falseMessage) {
 		final Player player = findPlayer();
 		Valid.checkNotNull(player, "Player cannot be null for " + this.event + "!");
 
@@ -194,11 +193,11 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 	}
 
 	/**
-	 * Cancel the event and send the player a message (see {@link #findPlayer(Event)})
+	 * Cancel the event and send the player a message (see {#findPlayer(Event)})
 	 *
 	 * @param messages
 	 */
-	protected final void cancel(String... messages) {
+	protected final void cancel(final String... messages) {
 		throw new EventHandledException(true, messages);
 	}
 
@@ -214,7 +213,7 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 	 *
 	 * @param messages
 	 */
-	protected final void returnTell(String... messages) {
+	protected final void returnTell(final String... messages) {
 		throw new EventHandledException(false, messages);
 	}
 
@@ -222,6 +221,6 @@ public abstract class SimpleListener<T extends Event> implements Listener, Event
 	 * A shortcut for registering this event in Bukkit
 	 */
 	public final void register() {
-		Bukkit.getPluginManager().registerEvent(eventClass, this, priority, this, SimplePlugin.getInstance(), ignoreCancelled);
+		Bukkit.getPluginManager().registerEvent(this.eventClass, this, this.priority, this, SimplePlugin.getInstance(), this.ignoreCancelled);
 	}
 }
