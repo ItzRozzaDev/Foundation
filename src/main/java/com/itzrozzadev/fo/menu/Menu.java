@@ -383,7 +383,11 @@ public abstract class Menu {
 			final ItemStack item = getItemAt(i);
 
 			if (item != null && item.getType() != CompMaterial.AIR.getMaterial() && !drawer.isSet(i))
-				drawer.setItem(i, makeMenuItem(item));
+				try {
+					drawer.setItem(i, makeMenuItem(item));
+				} catch (final Throwable t) {
+					drawer.setItem(i, item);
+				}
 		}
 
 		// Allow last minute modifications
