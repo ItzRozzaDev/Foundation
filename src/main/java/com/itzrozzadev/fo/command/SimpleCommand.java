@@ -121,7 +121,7 @@ public abstract class SimpleCommand extends Command {
 	 * Should we automatically send usage message when the first argument
 	 * equals to "help" or "?" ?
 	 */
-	private boolean autoHandleHelp = true;
+	protected boolean autoHandleHelp = true;
 
 	// ----------------------------------------------------------------------
 	// Temporary variables
