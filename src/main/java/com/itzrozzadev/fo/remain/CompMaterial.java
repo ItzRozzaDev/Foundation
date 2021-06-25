@@ -764,8 +764,8 @@ public enum CompMaterial {
 	POPPED_CHORUS_FRUIT("CHORUS_FRUIT_POPPED"),
 	POPPY("RED_ROSE"),
 	PORKCHOP("PORK"),
-	POTATO("POTATO"),
-	POTATOES("POTATO"),
+	POTATO("POTATO_ITEM"),
+	POTATOES("POTATO_ITEM"),
 	POTION("POTION"),
 	POTTED_ACACIA_SAPLING("FLOWER_POT"),
 	POTTED_ALLIUM("FLOWER_POT"),
@@ -1190,7 +1190,7 @@ public enum CompMaterial {
 
 	// Handles Minecraft below 1.12 and replaces non-existing Materials to STONE.
 	private Material findName() {
-		final String[] names = {name(), legacyName, alternativeName, "STONE"};
+		final String[] names = {name(), this.legacyName, this.alternativeName, "STONE"};
 
 		for (final String legacy : names)
 			if (legacy != null)
@@ -1198,7 +1198,7 @@ public enum CompMaterial {
 					return Material.valueOf(legacy);
 
 				} catch (final IllegalArgumentException ex) {
-					materialAvailable = false;
+					this.materialAvailable = false;
 				}
 
 		throw new FoException("[REPORT] CompMaterial could not parse " + this + ". Tried: " + String.join(", ", names));
@@ -1243,7 +1243,7 @@ public enum CompMaterial {
 	public final ItemStack toItem(final int amount) {
 		final Material mat = toMaterial();
 
-		return MinecraftVersion.atLeast(MinecraftVersion.V.v1_13) ? new ItemStack(mat, amount) : new ItemStack(mat, amount, (byte) data);
+		return MinecraftVersion.atLeast(MinecraftVersion.V.v1_13) ? new ItemStack(mat, amount) : new ItemStack(mat, amount, (byte) this.data);
 	}
 
 	/**
@@ -1253,8 +1253,8 @@ public enum CompMaterial {
 	 */
 	private Material toMaterial() {
 		final Material mat = Material.matchMaterial(toString());
-		final Material altMat = alternativeName != null ? Material.matchMaterial(alternativeName) : null;
-		final Material legacyMat = legacyName != null ? Material.matchMaterial(legacyName) : null;
+		final Material altMat = this.alternativeName != null ? Material.matchMaterial(this.alternativeName) : null;
+		final Material legacyMat = this.legacyName != null ? Material.matchMaterial(this.legacyName) : null;
 
 		return mat != null ? mat : altMat != null ? altMat : legacyMat;
 	}
@@ -1268,7 +1268,7 @@ public enum CompMaterial {
 	 * @return
 	 */
 	public final boolean is(final Material mat) {
-		return material == mat;
+		return this.material == mat;
 	}
 
 	/**
@@ -1280,7 +1280,7 @@ public enum CompMaterial {
 	 */
 	public final boolean is(final ItemStack comp) {
 		if (MinecraftVersion.atLeast(MinecraftVersion.V.v1_13))
-			return comp.getType() == material;
+			return comp.getType() == this.material;
 		return is(comp.getType(), comp.getData().getData());
 	}
 
@@ -1292,7 +1292,7 @@ public enum CompMaterial {
 	 */
 	public final boolean is(final Block block) {
 		if (MinecraftVersion.atLeast(MinecraftVersion.V.v1_13))
-			return block.getType() == material;
+			return block.getType() == this.material;
 		return block != null && is(block.getType(), block.getData());
 	}
 
@@ -1305,7 +1305,7 @@ public enum CompMaterial {
 	 */
 	public final boolean is(final Material type, final int data) {
 		if (MinecraftVersion.atLeast(MinecraftVersion.V.v1_13))
-			return type == material;
+			return type == this.material;
 
 		if (type == toMaterial() && data == this.data)
 			return true;
