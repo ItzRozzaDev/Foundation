@@ -331,43 +331,44 @@ public abstract class SimpleCommand extends Command {
 				checkPerm(getPermission());
 
 			// Check for minimum required arguments and print help
-			if (args.length < getMinArguments() && this.autoHandleHelp && args.length == 1 && ("help".equals(args[0]) || "?".equals(args[0]) && !label.equals("r") && !label.equals("reply"))) {
+			if (args.length < getMinArguments() && args.length == 1 && ("help".equals(args[0]) || "?".equals(args[0]) && !label.equals("r") && !label.equals("reply"))) {
+				if (this.autoHandleHelp) {
+					Common.runAsync(() -> {
+						final String usage = getMultilineUsageMessage() != null ? String.join("\n&c", getMultilineUsageMessage()) : getUsage() != null ? getUsage() : null;
+						Valid.checkNotNull(usage, "getUsage() nor getMultilineUsageMessage() not implemented for '/" + getLabel() + subLabel + "' command!");
 
-				Common.runAsync(() -> {
-					final String usage = getMultilineUsageMessage() != null ? String.join("\n&c", getMultilineUsageMessage()) : getUsage() != null ? getUsage() : null;
-					Valid.checkNotNull(usage, "getUsage() nor getMultilineUsageMessage() not implemented for '/" + getLabel() + subLabel + "' command!");
+						final ChatPaginator paginator = new ChatPaginator(HEADER_SECONDARY_COLOR);
+						final List<String> pages = new ArrayList<>();
 
-					final ChatPaginator paginator = new ChatPaginator(HEADER_SECONDARY_COLOR);
-					final List<String> pages = new ArrayList<>();
+						if (!Common.getOrEmpty(getDescription()).isEmpty()) {
+							pages.add(replacePlaceholders(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_DESCRIPTION + " &f" + replacePlaceholders(Common.stripColors(getDescription()))));
+						}
 
-					if (!Common.getOrEmpty(getDescription()).isEmpty()) {
-						pages.add(replacePlaceholders(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_DESCRIPTION + " &f" + replacePlaceholders(Common.stripColors(getDescription()))));
-					}
+						if (getMultilineUsageMessage() != null) {
+							pages.add("");
+							pages.add(replacePlaceholders(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_USAGES));
 
-					if (getMultilineUsageMessage() != null) {
-						pages.add("");
-						pages.add(replacePlaceholders(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_USAGES));
+							for (final String usagePart : usage.split("\n"))
+								pages.add("&7&l» " + replacePlaceholders(HEADER_SECONDARY_COLOR + usagePart));
 
-						for (final String usagePart : usage.split("\n"))
-							pages.add("&7&l» " + replacePlaceholders(HEADER_SECONDARY_COLOR + usagePart));
+						} else {
+							pages.add("");
+							pages.add(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_USAGE + " &f" + replacePlaceholders("/" + label + subLabel + (!usage.startsWith("/") ? " " + Common.stripColors(usage) : "")));
+						}
+						if (!isPlayer() || sender.isOp()) {
+							pages.add("");
+							pages.add(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_PERMISSION + " &f" + getPermission());
+						}
 
-					} else {
-						pages.add("");
-						pages.add(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_USAGE + " &f" + replacePlaceholders("/" + label + subLabel + (!usage.startsWith("/") ? " " + Common.stripColors(usage) : "")));
-					}
-					if (!isPlayer() || sender.isOp()) {
-						pages.add("");
-						pages.add(HEADER_SECONDARY_COLOR + SimpleLocalization.Commands.LABEL_PERMISSION + " &f" + getPermission());
-					}
+						pages.add(HEADER_SECONDARY_COLOR + Common.chatLineSmooth());
+						paginator.setFoundationHeader(SimpleLocalization.Commands.LABEL_HELP_FOR.replace("{label}", getLabel() + subLabel)).setPages(Common.toArray(pages));
 
-					pages.add(HEADER_SECONDARY_COLOR + Common.chatLineSmooth());
-					paginator.setFoundationHeader(SimpleLocalization.Commands.LABEL_HELP_FOR.replace("{label}", getLabel() + subLabel)).setPages(Common.toArray(pages));
+						// Force sending on the main thread
+						Common.runLater(() -> paginator.send(sender));
+					});
 
-					// Force sending on the main thread
-					Common.runLater(() -> paginator.send(sender));
-				});
-
-				return true;
+					return true;
+				}
 			}
 
 			// Check if we can run this command in time
