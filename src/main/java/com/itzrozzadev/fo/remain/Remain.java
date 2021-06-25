@@ -2063,9 +2063,9 @@ public final class Remain {
 			PotionSetter.setPotion(item, type, level);
 	}
 
-	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int seconds) {
+	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int seconds, final CompColor color) {
 		if (hasItemMeta)
-			PotionSetter.setPotion(item, type, level, seconds);
+			PotionSetter.setPotion(item, type, level, seconds, color.getColor());
 	}
 
 	/**
@@ -2672,18 +2672,15 @@ class PotionSetter {
 		item.setItemMeta(meta);
 	}
 
-	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int timeInSeconds) {
+	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int timeInSeconds, final Color color) {
 		Valid.checkBoolean(item.getItemMeta() instanceof org.bukkit.inventory.meta.PotionMeta, "Can only use setPotion for items with PotionMeta not: " + item.getItemMeta());
 		final PotionType wrapped = PotionType.getByEffect(type);
 		final org.bukkit.inventory.meta.PotionMeta meta = (org.bukkit.inventory.meta.PotionMeta) item.getItemMeta();
 
-		try {
-			buildPotion(level, wrapped, meta);
 
-		} catch (final NoSuchMethodError | NoClassDefFoundError ex) {
-			meta.setMainEffect(type);
-			meta.addCustomEffect(new PotionEffect(type, timeInSeconds, level - 1), true);
-		}
+		meta.setMainEffect(type);
+		meta.addCustomEffect(new PotionEffect(type, timeInSeconds, level - 1), true);
+		meta.setColor(color);
 
 		item.setItemMeta(meta);
 	}
