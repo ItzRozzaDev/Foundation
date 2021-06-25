@@ -39,6 +39,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
@@ -2062,6 +2063,11 @@ public final class Remain {
 			PotionSetter.setPotion(item, type, level);
 	}
 
+	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int seconds) {
+		if (hasItemMeta)
+			PotionSetter.setPotion(item, type, level, seconds);
+	}
+
 	/**
 	 * Attempts to return the I18N localized display name, or returns the
 	 * capitalized Material name if fails.
@@ -2656,12 +2662,7 @@ class PotionSetter {
 		final org.bukkit.inventory.meta.PotionMeta meta = (org.bukkit.inventory.meta.PotionMeta) item.getItemMeta();
 
 		try {
-			final org.bukkit.potion.PotionData data = new org.bukkit.potion.PotionData(level > 0 && wrapped != null ? wrapped : PotionType.WATER);
-
-			if (level > 0 && wrapped == null)
-				meta.addEnchant(Enchantment.DURABILITY, 1, true);
-
-			meta.setBasePotionData(data);
+			buildPotion(level, wrapped, meta);
 
 		} catch (final NoSuchMethodError | NoClassDefFoundError ex) {
 			meta.setMainEffect(type);
@@ -2669,5 +2670,29 @@ class PotionSetter {
 		}
 
 		item.setItemMeta(meta);
+	}
+
+	public static void setPotion(final ItemStack item, final PotionEffectType type, final int level, final int timeInSeconds) {
+		Valid.checkBoolean(item.getItemMeta() instanceof org.bukkit.inventory.meta.PotionMeta, "Can only use setPotion for items with PotionMeta not: " + item.getItemMeta());
+		final PotionType wrapped = PotionType.getByEffect(type);
+		final org.bukkit.inventory.meta.PotionMeta meta = (org.bukkit.inventory.meta.PotionMeta) item.getItemMeta();
+
+		try {
+			buildPotion(level, wrapped, meta);
+
+		} catch (final NoSuchMethodError | NoClassDefFoundError ex) {
+			meta.setMainEffect(type);
+			meta.addCustomEffect(new PotionEffect(type, timeInSeconds, level - 1), true);
+		}
+
+		item.setItemMeta(meta);
+	}
+
+	private static void buildPotion(final int level, final PotionType wrapped, final PotionMeta meta) {
+		final org.bukkit.potion.PotionData data = new org.bukkit.potion.PotionData(level > 0 && wrapped != null ? wrapped : PotionType.WATER);
+
+		if (level > 0 && wrapped == null)
+			meta.addEnchant(Enchantment.DURABILITY, 1, true);
+		meta.setBasePotionData(data);
 	}
 }

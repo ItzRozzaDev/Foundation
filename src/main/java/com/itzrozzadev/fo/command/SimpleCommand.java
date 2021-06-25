@@ -332,7 +332,7 @@ public abstract class SimpleCommand extends Command {
 
 			// Check for minimum required arguments and print help
 			if (args.length < getMinArguments() && args.length == 1 && ("help".equals(args[0]) || "?".equals(args[0]) && !label.equals("r") && !label.equals("reply"))) {
-				if (this.autoHandleHelp) {
+				if (this.autoHandleHelp)
 					Common.runAsync(() -> {
 						final String usage = getMultilineUsageMessage() != null ? String.join("\n&c", getMultilineUsageMessage()) : getUsage() != null ? getUsage() : null;
 						Valid.checkNotNull(usage, "getUsage() nor getMultilineUsageMessage() not implemented for '/" + getLabel() + subLabel + "' command!");
@@ -367,45 +367,56 @@ public abstract class SimpleCommand extends Command {
 						Common.runLater(() -> paginator.send(sender));
 					});
 
-					return true;
-				}
+				return true;
 			}
-
-			// Check if we can run this command in time
-			if (this.cooldownSeconds > 0)
-				handleCooldown();
-
-			onCommand();
-
-		} catch (final InvalidCommandArgException ex) {
-			if (getMultilineUsageMessage() == null)
-				dynamicTellError(ex.getMessage() != null ? ex.getMessage() : SimpleLocalization.Commands.INVALID_SUB_ARGUMENT);
-			else {
-				dynamicTellError(SimpleLocalization.Commands.INVALID_ARGUMENT_MULTILINE);
-
-				for (final String line : getMultilineUsageMessage())
-					tellNoPrefix("&c" + line);
-			}
-
-		} catch (final CommandException ex) {
-			if (ex.getMessages() != null)
-				dynamicTellError(ex.getMessages());
-
-		} catch (final Throwable t) {
-			dynamicTellError(SimpleLocalization.Commands.ERROR.replace("{error}", t.toString()));
-
-			Common.error(t, "Failed to execute command /" + getLabel() + subLabel + " " + String.join(" ", args));
-
-		} finally {
-			Common.ADD_TELL_PREFIX = hadTellPrefix;
-
-			// Prevent duplication since MainCommand delegates this
-			if (!(this instanceof MainCommand))
-				LagCatcher.end(lagSection, 250, "{section} took {time} ms");
 		}
 
-		return true;
+		// Check if we can run this command in time
+		if (this.cooldownSeconds > 0)
+			handleCooldown();
+
+		onCommand();
+
+	} catch(
+	final InvalidCommandArgException ex)
+
+	{
+		if (getMultilineUsageMessage() == null)
+			dynamicTellError(this.ex.getMessage() != null ? this.ex.getMessage() : SimpleLocalization.Commands.INVALID_SUB_ARGUMENT);
+		else {
+			dynamicTellError(SimpleLocalization.Commands.INVALID_ARGUMENT_MULTILINE);
+
+			for (final String line : getMultilineUsageMessage())
+				tellNoPrefix("&c" + line);
+		}
+
+	} catch(
+	final CommandException ex)
+
+	{
+		if (this.ex.getMessages() != null)
+			dynamicTellError(this.ex.getMessages());
+
+	} catch(
+	final Throwable t)
+
+	{
+		dynamicTellError(SimpleLocalization.Commands.ERROR.replace("{error}", this.t.toString()));
+
+		Common.error(this.t, "Failed to execute command /" + getLabel() + subLabel + " " + String.join(" ", this.args));
+
+	} finally
+
+	{
+		Common.ADD_TELL_PREFIX = hadTellPrefix;
+
+		// Prevent duplication since MainCommand delegates this
+		if (!(this instanceof MainCommand))
+			LagCatcher.end(lagSection, 250, "{section} took {time} ms");
 	}
+
+		return true
+}
 
 	/*
 	 * If messenger is on, we send the message prefixed with Messenger.getErrorPrefix()
