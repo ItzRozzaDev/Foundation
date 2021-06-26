@@ -475,7 +475,7 @@ public abstract class SimpleCommandGroup {
 									hover.add("&f" + replacePlaceholders(colorizeUsage(usageLine.replace("{sublabel}", subcommand.getSubLabel()))));
 
 							} else
-								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE + " " + (usage.isEmpty() ? command : command + usage));
+								hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_USAGE + (usage.isEmpty() ? command : command + " " + usage));
 
 							line.onHover(hover);
 							line.onClickSuggestCmd("/" + getLabel() + " " + subcommand.getSubLabel());
