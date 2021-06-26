@@ -460,7 +460,7 @@ public abstract class SimpleCommandGroup {
 						final SimpleComponent line = SimpleComponent.of(plainMessage);
 
 						if (!desc.isEmpty() && atLeast17) {
-							final String command = SimpleCommandGroup.this.mainArgument + "/" + getLabel() + SimpleCommandGroup.this.firstArgument + subcommand.getSubLabel() + " ";
+							final String command = SimpleCommandGroup.this.mainArgument + "/" + getLabel() + SimpleCommandGroup.this.firstArgument + " " + subcommand.getSubLabel();
 							final List<String> hover = new ArrayList<>();
 
 							hover.add(SimpleLocalization.Commands.HELP_TOOLTIP_DESCRIPTION.replace("{description}", desc));
