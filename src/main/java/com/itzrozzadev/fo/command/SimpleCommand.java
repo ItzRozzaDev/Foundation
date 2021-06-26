@@ -1479,7 +1479,7 @@ public abstract class SimpleCommand extends Command {
 	public final String getUsage() {
 		final String bukkitUsage = super.getUsage();
 
-		return bukkitUsage.equals("/" + getMainLabel()) ? "" : bukkitUsage;
+		return bukkitUsage.equals("/" + getMainLabel()) ? " " : bukkitUsage;
 	}
 
 	/**
