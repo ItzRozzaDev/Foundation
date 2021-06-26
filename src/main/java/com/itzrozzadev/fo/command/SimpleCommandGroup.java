@@ -451,9 +451,8 @@ public abstract class SimpleCommandGroup {
 						final String desc = Common.getOrEmpty(subcommand.getDescription());
 						final String plainMessage = Replacer.replaceArray(getSubcommandDescription(),
 								"label", SimpleCommandGroup.this.mainArgument + "/" + getLabel(),
-								"sublabel", SimpleCommandGroup.this.firstArgument + subcommand.getSubLabel(),
+								"sublabel", SimpleCommandGroup.this.firstArgument + (atLeast17 ? "&n" : "") + subcommand.getSubLabel() + (atLeast17 ? "&r" : ""),
 								"usage", usage,
-								"sublabel", (atLeast17 ? "&n" : "") + subcommand.getSubLabel() + (atLeast17 ? "&r" : ""),
 								"description", !desc.isEmpty() && !atLeast17 ? desc : "",
 								"dash", !desc.isEmpty() && !atLeast17 ? "&e-" : "");
 
