@@ -23,6 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -1479,14 +1480,14 @@ public abstract class SimpleCommand extends Command {
 	public final String getUsage() {
 		final String bukkitUsage = super.getUsage();
 
-		return bukkitUsage.equals("/" + getMainLabel()) ? " " : bukkitUsage;
+		return bukkitUsage.equals("/" + getMainLabel()) ? "" : bukkitUsage;
 	}
 
 	/**
 	 * Get the most recent label for this command
 	 */
 	@Override
-	public final String getLabel() {
+	public final @NotNull String getLabel() {
 		return this.label;
 	}
 
