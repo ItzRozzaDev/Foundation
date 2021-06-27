@@ -102,7 +102,7 @@ public class SimpleLocalization extends YamlStaticConfig {
 		/**
 		 * The message shown when there is a fatal error running this command
 		 */
-		public static String COOLDOWN_WAIT = "&cWait {duration} second(s) before using this command again.";
+		public static String COOLDOWN_WAIT = "&cWait {duration} before using this command again.";
 
 		/**
 		 * Keys below indicate an invalid action or input

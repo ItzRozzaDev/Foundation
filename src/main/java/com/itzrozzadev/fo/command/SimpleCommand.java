@@ -432,11 +432,15 @@ public abstract class SimpleCommand extends Command {
 			final long lastExecutionDifference = (System.currentTimeMillis() - lastExecution) / 1000;
 
 			// Check if the command was not run earlier within the wait threshold
-			checkBoolean(lastExecution == 0 || lastExecutionDifference > this.cooldownSeconds, Common.getOrDefault(this.cooldownMessage, SimpleLocalization.Commands.COOLDOWN_WAIT).replace("{duration}", this.cooldownSeconds - lastExecutionDifference + 1 + ""));
+			checkBoolean(lastExecution == 0 || lastExecutionDifference > this.cooldownSeconds, Common.getOrDefault(this.cooldownMessage, SimpleLocalization.Commands.COOLDOWN_WAIT).replace("{duration}", getFormattedTime(this.cooldownSeconds - lastExecutionDifference + 1)));
 
 			// Update the last try with the current time
 			this.cooldownMap.put(player.getUniqueId(), System.currentTimeMillis());
 		}
+	}
+
+	protected String getFormattedTime(final long time) {
+		return TimeUtil.formatTimeShort(time);
 	}
 
 	/**
