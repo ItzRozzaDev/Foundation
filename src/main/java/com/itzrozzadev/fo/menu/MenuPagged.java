@@ -49,8 +49,8 @@ public abstract class MenuPagged<T> extends Menu {
 	 */
 	protected Button prevButton;
 
-	protected int nextPageSlot = getSize() - 4;
-	protected int previousPageSlot = getSize() - 6;
+	protected int nextPageSlot;
+	protected int previousPageSlot;
 
 	/**
 	 * Create a new paged menu where each page has 3 rows + 1 bottom bar
@@ -145,6 +145,8 @@ public abstract class MenuPagged<T> extends Menu {
 		this.pages = Common.fillPages(autoPageSize, pages);
 
 		setSize(9 + autoPageSize);
+		this.nextPageSlot = getSize() - 4;
+		this.previousPageSlot = getSize() - 6;
 		setButtons();
 	}
 
@@ -153,6 +155,8 @@ public abstract class MenuPagged<T> extends Menu {
 		this.currentPage = 1;
 		this.pages = Common.fillPages(pageSize, pages);
 		setSize(bottomBarSize + pageSize);
+		this.nextPageSlot = getSize() - 4;
+		this.previousPageSlot = getSize() - 6;
 		setButtons(true);
 	}
 
