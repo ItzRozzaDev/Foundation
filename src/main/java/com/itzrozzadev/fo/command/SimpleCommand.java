@@ -332,7 +332,7 @@ public abstract class SimpleCommand extends Command {
 				checkPerm(getPermission());
 
 			// Check for minimum required arguments and print help
-			if (args.length < getMinArguments() && args.length == 1 && ("help".equals(args[0]) || "?".equals(args[0]) && !label.equals("r") && !label.equals("reply"))) {
+			if (args.length < getMinArguments() || args.length == 1 && ("help".equals(args[0]) || "?".equals(args[0]) && !label.equals("r") && !label.equals("reply"))) {
 				if (this.autoHandleHelp) {
 					Common.runAsync(() -> {
 						final String usage = getMultilineUsageMessage() != null ? String.join("\n&c", getMultilineUsageMessage()) : getUsage() != null ? getUsage() : null;
