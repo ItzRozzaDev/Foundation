@@ -213,18 +213,26 @@ public abstract class MenuPagged<T> extends Menu {
 				final int previousPage = MenuPagged.this.currentPage - 1;
 
 				return ItemCreator
-						.of(this.canGo ? getHasPagesMaterial() : getNoPagesMaterial())
+						.of(this.canGo ? getHasPagesPrevMaterial() : getNoPagesPrevMaterial())
 						.name(previousPage == 0 ? SimpleLocalization.Menu.PAGE_FIRST : SimpleLocalization.Menu.PAGE_PREVIOUS.replace("{page}", String.valueOf(previousPage)))
 						.build().make();
 			}
 		};
 	}
 
-	protected CompMaterial getHasPagesMaterial() {
+	protected CompMaterial getHasPagesNextMaterial() {
 		return CompMaterial.LIME_DYE;
 	}
 
-	protected CompMaterial getNoPagesMaterial() {
+	protected CompMaterial getNoPagesNextMaterial() {
+		return CompMaterial.GRAY_DYE;
+	}
+
+	protected CompMaterial getHasPagesPrevMaterial() {
+		return CompMaterial.LIME_DYE;
+	}
+
+	protected CompMaterial getNoPagesPrevMaterial() {
 		return CompMaterial.GRAY_DYE;
 	}
 
@@ -251,7 +259,7 @@ public abstract class MenuPagged<T> extends Menu {
 				final boolean lastPage = MenuPagged.this.currentPage == MenuPagged.this.pages.size();
 
 				return ItemCreator
-						.of(this.canGo ? getHasPagesMaterial() : getNoPagesMaterial())
+						.of(this.canGo ? getHasPagesNextMaterial() : getNoPagesNextMaterial())
 						.name(lastPage ? SimpleLocalization.Menu.PAGE_LAST : SimpleLocalization.Menu.PAGE_NEXT.replace("{page}", String.valueOf(MenuPagged.this.currentPage + 1)))
 						.build().make();
 			}
