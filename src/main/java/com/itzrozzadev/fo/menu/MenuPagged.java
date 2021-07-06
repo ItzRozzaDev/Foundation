@@ -49,17 +49,8 @@ public abstract class MenuPagged<T> extends Menu {
 	 */
 	protected Button prevButton;
 
-	protected int nextPageSlot = getNextPageSlot();
-	protected int previousPageSlot = getPreviousPageSlot();
-
-	protected int getNextPageSlot() {
-		return getSize() - 4;
-	}
-
-	protected int getPreviousPageSlot() {
-		return getSize() - 6;
-	}
-
+	protected int nextPageSlot = getSize() - 4;
+	protected int previousPageSlot = getSize() - 6;
 
 	/**
 	 * Create a new paged menu where each page has 3 rows + 1 bottom bar
@@ -355,13 +346,9 @@ public abstract class MenuPagged<T> extends Menu {
 
 			if (object != null)
 				return convertToItemStack(object);
-		}
-
-		if (slot == this.nextPageSlot) {
+		} else if (slot == this.nextPageSlot) {
 			return this.nextButton.getItem();
-		}
-
-		if (slot == this.previousPageSlot)
+		} else if (slot == this.previousPageSlot)
 			return this.prevButton.getItem();
 
 		return null;
