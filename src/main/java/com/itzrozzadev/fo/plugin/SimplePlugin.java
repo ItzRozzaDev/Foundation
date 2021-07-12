@@ -2,11 +2,13 @@ package com.itzrozzadev.fo.plugin;
 
 import com.itzrozzadev.fo.Common;
 import com.itzrozzadev.fo.MinecraftVersion;
+import com.itzrozzadev.fo.ReflectionUtil;
 import com.itzrozzadev.fo.Valid;
 import com.itzrozzadev.fo.bungee.SimpleBungee;
 import com.itzrozzadev.fo.collection.StrictList;
 import com.itzrozzadev.fo.command.SimpleCommand;
 import com.itzrozzadev.fo.command.SimpleCommandGroup;
+import com.itzrozzadev.fo.command.SimpleSubCommand;
 import com.itzrozzadev.fo.debug.Debugger;
 import com.itzrozzadev.fo.event.SimpleListener;
 import com.itzrozzadev.fo.exception.FoException;
@@ -486,7 +488,7 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 				Bukkit.getLogger().severe("");
 				Bukkit.getLogger().severe("This is likely caused by two plugins having the");
 				Bukkit.getLogger().severe("same Foundation library paths - make sure you");
-				Bukkit.getLogger().severe("relocale the package! If you are testing using");
+				Bukkit.getLogger().severe("relocate the package! If you are testing using");
 				Bukkit.getLogger().severe("Ant, only test one plugin at the time.");
 				Bukkit.getLogger().severe("");
 				Bukkit.getLogger().severe("Possible cause: " + SimplePlugin.getNamed());
@@ -511,14 +513,14 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 		try {
 			Class.forName("net.md_5.bungee.api.chat.BaseComponent");
 			md_5 = true;
-		} catch (final ClassNotFoundException ex) {
+		} catch (final ClassNotFoundException ignored) {
 		}
 
 		try {
 			Class.forName("com.google.gson.JsonSyntaxException");
 			gson = true;
 
-		} catch (final ClassNotFoundException ex) {
+		} catch (final ClassNotFoundException ignored) {
 		}
 
 		if (!md_5 || !gson) {
@@ -527,9 +529,6 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			Bukkit.getLogger().severe("lacks libraries " + getName() + " needs:");
 			Bukkit.getLogger().severe("JSON Chat (by md_5) found: " + md_5);
 			Bukkit.getLogger().severe("Gson (by Google) found: " + gson);
-			Bukkit.getLogger().severe(" ");
-			Bukkit.getLogger().severe("To fix that, please install BungeeChatAPI:");
-			Bukkit.getLogger().severe("https://mineacademy.org/plugins/#misc");
 			Bukkit.getLogger().severe(Common.consoleLine());
 		}
 
@@ -825,7 +824,40 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 	// ----------------------------------------------------------------------------------------
 	// Methods
-	// ----------------------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------------------
+
+	/**
+	 * Convenience method for quickly registering events in all classes in your plugin that
+	 * extend the given class.
+	 * NB: You must have a no arguments constructor otherwise it will not be registered
+	 *
+	 * @param extendingClass
+	 */
+	protected final <T extends Listener> void registerAllEvents(final Class<T> extendingClass) {
+
+		Valid.checkBoolean(!extendingClass.equals(Listener.class), "registerAllEvents does not support Listener.class due to conflicts, create your own middle class instead");
+
+		// Run after the plugin has loaded to prevent IllegalStateException: Initial initialization
+		Common.runLater(() -> {
+
+			classLookup:
+
+			for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
+				for (final Constructor<?> con : pluginClass.getConstructors()) {
+					if (con.getParameterCount() == 0) {
+						final T instance = (T) ReflectionUtil.instantiate(con);
+
+						Debugger.debug("auto-register", "Auto-registering events in " + pluginClass);
+						registerEvents(instance);
+
+						continue classLookup;
+					}
+				}
+
+				Debugger.debug("auto-register", "Skipping auto-registering events in " + pluginClass + " because it lacks at least one no arguments constructor");
+			}
+		});
+	}
 
 	/**
 	 * Convenience method for quickly registering events if the condition is met
@@ -880,6 +912,50 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 			this.reloadables.registerEvents(listener);
 		else
 			listener.register();
+	}
+
+	/**
+	 * Convenience method for quickly registering all command classes in your plugin that
+	 * extend the given class.
+	 * NB: You must have a no arguments constructor otherwise it will not be registered
+	 *
+	 * @param extendingClass
+	 */
+	protected final <T extends Command> void registerAllCommands(final Class<T> extendingClass) {
+
+		Valid.checkBoolean(!extendingClass.equals(Command.class), "registerAllCommands does not support Command.class due to conflicts, create your own middle class instead");
+		Valid.checkBoolean(!extendingClass.equals(SimpleCommand.class), "registerAllCommands does not support SimpleCommand.class due to conflicts, create your own middle class instead");
+
+		// Run after the plugin has loaded to prevent IllegalStateException: Initial initialization
+		Common.runLater(() -> {
+
+			classLookup:
+			for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
+
+				if (SimpleSubCommand.class.isAssignableFrom(pluginClass)) {
+					Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because sub-commands cannot be registered");
+
+					continue;
+				}
+
+				for (final Constructor<?> con : pluginClass.getConstructors()) {
+					if (con.getParameterCount() == 0) {
+						final T instance = (T) ReflectionUtil.instantiate(con);
+
+						Debugger.debug("auto-register", "Auto-registering command " + pluginClass);
+
+						if (instance instanceof SimpleCommand)
+							registerCommand((SimpleCommand) instance);
+
+						else
+							registerCommand(instance);
+
+						continue classLookup;
+					}
+				}
+				Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because it lacks at least one no arguments constructor");
+			}
+		});
 	}
 
 	/**

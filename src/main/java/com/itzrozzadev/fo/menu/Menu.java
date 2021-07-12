@@ -35,17 +35,6 @@ import java.util.*;
 
 /**
  * The core class of Menu. Represents a simple menu.
- *
- * <p>
- * This is the recommended menu class for all plugins having menus. It offers
- * having a parent menu, a return button and an info button explaining the
- * purpose of the menu to the user.
- *
- * <p>
- * HOW TO GET STARTED: Place final {@link Button} fields in your menu class and
- * make a instatiate when in constructor. Those will be registered as clickable
- * automatically. To render them, override {@link #getItemAt(int)} and make them
- * return at your desired positions.
  */
 public abstract class Menu {
 
@@ -71,7 +60,7 @@ public abstract class Menu {
 	 * The default duration of the new animated title before
 	 * it is reverted back to the old one
 	 * <p>
-	 * Used in {@link #updateInventoryTitle(Menu, Player, String, String)}
+	 * Used in {#updateInventoryTitle(Menu, Player, String, String)}
 	 */
 	@Setter
 	private static int titleAnimationDurationTicks = 20;
@@ -91,7 +80,7 @@ public abstract class Menu {
 	private final List<Button> registeredButtons = new ArrayList<>();
 
 	/**
-	 * The registrator responsible for scanning the class and making buttons
+	 * The register responsible for scanning the class and making buttons
 	 * function
 	 */
 	private boolean buttonsRegistered = false;

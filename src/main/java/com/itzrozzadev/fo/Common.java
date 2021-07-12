@@ -68,7 +68,7 @@ public final class Common {
 	/**
 	 * Pattern used to match colors with #HEX code for MC 1.16+
 	 */
-	public static final Pattern RGB_HEX_COLOR_REGEX = Pattern.compile("(?<!\\\\)#((?:[0-9a-fA-F]{3}){1,2})");
+	public static final Pattern RGB_HEX_COLOR_REGEX = Pattern.compile("(?<!\\\\)(&|)#((?:[0-9a-fA-F]{3}){1,2})");
 
 	/**
 	 * Pattern used to match colors with {#HEX} code for MC 1.16+
@@ -216,7 +216,7 @@ public final class Common {
 		if (message != null && !message.equals("none")) {
 			for (final Player online : Remain.getOnlinePlayers())
 				if (PlayerUtil.hasPerm(online, permission))
-					tellJson(online, message);
+					tellNoPrefix(online, message);
 
 			if (log)
 				log(message);
@@ -611,7 +611,7 @@ public final class Common {
 			match = RGB_HEX_COLOR_REGEX.matcher(result);
 
 			while (match.find()) {
-				final String colorCode = match.group(1);
+				final String colorCode = match.group(2);
 				String replacement = "";
 
 				try {

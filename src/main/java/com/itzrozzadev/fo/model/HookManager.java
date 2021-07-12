@@ -157,10 +157,10 @@ public final class HookManager {
 		if (Common.doesPluginExist("PlotSquared")) {
 			final String ver = Bukkit.getPluginManager().getPlugin("PlotSquared").getDescription().getVersion();
 
-			if (ver.startsWith("5.") || ver.startsWith("3."))
+			if (ver.startsWith("6.") || ver.startsWith("5.") || ver.startsWith("3."))
 				plotSquaredHook = new PlotSquaredHook();
 			else
-				Common.log("&cWarning: &fCould not hook into PlotSquared, version 3.x or 5.x required, you have " + ver);
+				Common.log("&cWarning: &fCould not hook into PlotSquared, version 3.x, 5.x or 6.x required, you have " + ver);
 		}
 
 		if (Common.doesPluginExist("ProtocolLib")) {
@@ -2341,7 +2341,12 @@ class PlotSquaredHook {
 				wrap = plotPlayerClass.getMethod("wrap", Object.class);
 
 			} catch (final ReflectiveOperationException ex2) {
-				throw new NullPointerException("PlotSquared could not convert " + player.getName() + " into PlotPlayer! Is the integration outdated?");
+				try {
+					wrap = plotPlayerClass.getMethod("from", Object.class);
+
+				} catch (final ReflectiveOperationException ex3) {
+					throw new FoException(ex3, "PlotSquared could not convert " + player.getName() + " into PlotPlayer! Is the integration outdated?");
+				}
 			}
 		}
 
