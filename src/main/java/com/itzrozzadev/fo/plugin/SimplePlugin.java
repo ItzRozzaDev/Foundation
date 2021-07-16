@@ -834,29 +834,26 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 	 * @param extendingClass
 	 */
 	protected final <T extends Listener> void registerAllEvents(final Class<T> extendingClass) {
-
 		Valid.checkBoolean(!extendingClass.equals(Listener.class), "registerAllEvents does not support Listener.class due to conflicts, create your own middle class instead");
 
-		// Run after the plugin has loaded to prevent IllegalStateException: Initial initialization
-		Common.runLater(() -> {
+		Valid.checkBoolean(!extendingClass.equals(SimpleListener.class), "registerAllEvents does not support SimpleListener.class due to conflicts, create your own middle class instead");
 
-			classLookup:
+		classLookup:
+		for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
+			for (final Constructor<?> con : pluginClass.getConstructors()) {
+				if (con.getParameterCount() == 0) {
+					final T instance = (T) ReflectionUtil.instantiate(con);
 
-			for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
-				for (final Constructor<?> con : pluginClass.getConstructors()) {
-					if (con.getParameterCount() == 0) {
-						final T instance = (T) ReflectionUtil.instantiate(con);
+					Debugger.debug("auto-register", "Auto-registering events in " + pluginClass);
+					registerEvents(instance);
 
-						Debugger.debug("auto-register", "Auto-registering events in " + pluginClass);
-						registerEvents(instance);
-
-						continue classLookup;
-					}
+					continue classLookup;
 				}
-
-				Debugger.debug("auto-register", "Skipping auto-registering events in " + pluginClass + " because it lacks at least one no arguments constructor");
 			}
-		});
+
+			Debugger.debug("auto-register", "Skipping auto-registering events in " + pluginClass + " because it lacks at least one no arguments constructor");
+		}
+
 	}
 
 	/**
@@ -925,37 +922,35 @@ public abstract class SimplePlugin extends JavaPlugin implements Listener {
 
 		Valid.checkBoolean(!extendingClass.equals(Command.class), "registerAllCommands does not support Command.class due to conflicts, create your own middle class instead");
 		Valid.checkBoolean(!extendingClass.equals(SimpleCommand.class), "registerAllCommands does not support SimpleCommand.class due to conflicts, create your own middle class instead");
+		Valid.checkBoolean(!extendingClass.equals(SimpleSubCommand.class), "registerAllCommands does not support SubCommand.class");
 
-		// Run after the plugin has loaded to prevent IllegalStateException: Initial initialization
-		Common.runLater(() -> {
+		classLookup:
+		for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
 
-			classLookup:
-			for (final Class<? extends T> pluginClass : ReflectionUtil.getClasses(instance, extendingClass)) {
+			if (SimpleSubCommand.class.isAssignableFrom(pluginClass)) {
+				Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because sub-commands cannot be registered");
 
-				if (SimpleSubCommand.class.isAssignableFrom(pluginClass)) {
-					Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because sub-commands cannot be registered");
-
-					continue;
-				}
-
-				for (final Constructor<?> con : pluginClass.getConstructors()) {
-					if (con.getParameterCount() == 0) {
-						final T instance = (T) ReflectionUtil.instantiate(con);
-
-						Debugger.debug("auto-register", "Auto-registering command " + pluginClass);
-
-						if (instance instanceof SimpleCommand)
-							registerCommand((SimpleCommand) instance);
-
-						else
-							registerCommand(instance);
-
-						continue classLookup;
-					}
-				}
-				Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because it lacks at least one no arguments constructor");
+				continue;
 			}
-		});
+
+			for (final Constructor<?> con : pluginClass.getConstructors()) {
+				if (con.getParameterCount() == 0) {
+					final T instance = (T) ReflectionUtil.instantiate(con);
+
+					Debugger.debug("auto-register", "Auto-registering command " + pluginClass);
+
+					if (instance instanceof SimpleCommand)
+						registerCommand((SimpleCommand) instance);
+
+					else
+						registerCommand(instance);
+
+					continue classLookup;
+				}
+			}
+
+			Debugger.debug("auto-register", "Skipping auto-registering command " + pluginClass + " because it lacks at least one no arguments constructor");
+		}
 	}
 
 	/**

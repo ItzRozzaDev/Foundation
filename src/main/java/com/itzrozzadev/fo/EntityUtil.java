@@ -15,9 +15,7 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -42,6 +40,7 @@ public final class EntityUtil {
 		return target instanceof Player && !HookManager.isNPC(target) ? (Player) target : null;
 	}
 
+
 	/**
 	 * Return the target for the given entity
 	 *
@@ -50,6 +49,28 @@ public final class EntityUtil {
 	 */
 	public static LivingEntity getTarget(final Entity entity) {
 		return entity instanceof Creature ? ((Creature) entity).getTarget() : null;
+	}
+
+	/**
+	 * Returns the closest entity to the center location within the given 3-dimensional range
+	 * that matches the given entity class, or null if not found.
+	 *
+	 * @param <T>
+	 * @param center
+	 * @param range3D
+	 * @param entityClass
+	 * @return
+	 */
+	public static <T extends LivingEntity> T findNearestEntity(final Location center, final double range3D, final Class<T> entityClass) {
+		final List<T> found = new ArrayList<>();
+
+		for (final Entity nearby : Objects.requireNonNull(center.getWorld()).getNearbyEntities(center, range3D, range3D, range3D))
+			if (nearby instanceof LivingEntity && entityClass.isAssignableFrom(nearby.getClass()))
+				found.add((T) nearby);
+
+		found.sort(Comparator.comparingDouble(t -> t.getLocation().distance(center)));
+
+		return found.isEmpty() ? null : found.get(0);
 	}
 
 	/**

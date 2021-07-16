@@ -403,7 +403,7 @@ public final class Remain {
 	 */
 	public static void sendPacket(final Player player, final Object packet) {
 		if (getHandle == null || fieldPlayerConnection == null || sendPacket == null) {
-			Common.log("Cannot send packet " + packet.getClass().getSimpleName() + " on your server sofware (known to be broken on Cauldron).");
+			Common.log("Cannot send packet " + packet.getClass().getSimpleName() + " on your server software (known to be broken on Cauldron).");
 
 			return;
 		}
@@ -415,7 +415,7 @@ public final class Remain {
 			sendPacket.invoke(playerConnection, packet);
 
 		} catch (final ReflectiveOperationException ex) {
-			throw new ReflectionException("Could not send " + packet.getClass().getSimpleName() + " to " + player.getName(), ex);
+			throw new ReflectionException("Error sending packet " + packet.getClass() + " to player " + player.getName(), ex);
 		}
 	}
 

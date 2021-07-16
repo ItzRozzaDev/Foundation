@@ -1,6 +1,5 @@
 package com.itzrozzadev.fo;
 
-import com.itzrozzadev.fo.MinecraftVersion.V;
 import com.itzrozzadev.fo.collection.SerializedMap;
 import com.itzrozzadev.fo.collection.StrictCollection;
 import com.itzrozzadev.fo.collection.StrictMap;
@@ -95,7 +94,7 @@ public final class SerializeUtil {
 		else if (obj instanceof net.md_5.bungee.api.ChatColor) {
 			final net.md_5.bungee.api.ChatColor color = ((net.md_5.bungee.api.ChatColor) obj);
 
-			return MinecraftVersion.atLeast(V.v1_16) ? color.toString() : color.name();
+			return MinecraftVersion.atLeast(MinecraftVersion.V.v1_16) ? color.toString() : color.name();
 		} else if (obj instanceof CompMaterial)
 			return obj.toString();
 
@@ -260,8 +259,14 @@ public final class SerializeUtil {
 		// Step 1 - Search for basic deserialize(SerializedMap) method
 		Method deserializeMethod = ReflectionUtil.getMethod(classOf, "deserialize", SerializedMap.class);
 
-		if (deserializeMethod != null)
-			return ReflectionUtil.invokeStatic(deserializeMethod, map);
+		if (deserializeMethod != null) {
+			try {
+				return ReflectionUtil.invokeStatic(deserializeMethod, map);
+
+			} catch (final ReflectionUtil.ReflectionException ex) {
+				Common.throwError(ex, "Could not deserialize " + classOf + " from data: " + map);
+			}
+		}
 
 		// Step 2 - Search for our deserialize(Params[], SerializedMap) method
 		if (deserializeParameters != null) {
@@ -302,6 +307,7 @@ public final class SerializeUtil {
 
 		// Step 4 - If there is no deserialize method, just deserialize the given object
 		if (object != null)
+
 			if (classOf == String.class)
 				object = object.toString();
 
@@ -350,7 +356,6 @@ public final class SerializeUtil {
 			else if (classOf == BaseComponent.class) {
 				final BaseComponent[] deserialized = Remain.toComponent(object.toString());
 				Valid.checkBoolean(deserialized.length == 1, "Failed to deserialize into singular BaseComponent: " + object);
-
 				object = deserialized[0];
 
 			} else if (classOf == BaseComponent[].class)

@@ -85,7 +85,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @see Map#containsKey(Object)
 	 */
 	public boolean containsKey(final String key) {
-		return map.contains(key);
+		return this.map.contains(key);
 	}
 
 	/**
@@ -104,7 +104,7 @@ public final class SerializedMap extends StrictCollection {
 				lastKey = (String) obj;
 
 			} else
-				map.override(lastKey, obj);
+				this.map.override(lastKey, obj);
 
 			string = !string;
 		}
@@ -118,7 +118,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @param anotherMap
 	 */
 	public SerializedMap put(@NonNull final SerializedMap anotherMap) {
-		map.putAll(anotherMap.asMap());
+		this.map.putAll(anotherMap.asMap());
 
 		return this;
 	}
@@ -160,7 +160,7 @@ public final class SerializedMap extends StrictCollection {
 			// This value is undesirable to save if null, so if YamlConfig is used
 			// it will remove it from the config
 		else
-			map.getSource().put(key, null);
+			this.map.getSource().put(key, null);
 	}
 
 	/**
@@ -178,7 +178,7 @@ public final class SerializedMap extends StrictCollection {
 			// This value is undesirable to save if null, so if YamlConfig is used
 			// it will remove it from the config
 		else
-			map.getSource().put(key, null);
+			this.map.getSource().put(key, null);
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class SerializedMap extends StrictCollection {
 			// This value is undesirable to save if null, so if YamlConfig is used
 			// it will remove it from the config
 		else
-			map.getSource().put(key, null);
+			this.map.getSource().put(key, null);
 	}
 
 	/**
@@ -214,7 +214,7 @@ public final class SerializedMap extends StrictCollection {
 			// This value is undesirable to save if null, so if YamlConfig is used
 			// it will remove it from the config
 		else
-			map.getSource().put(key, null);
+			this.map.getSource().put(key, null);
 	}
 
 	/**
@@ -227,7 +227,7 @@ public final class SerializedMap extends StrictCollection {
 	public void put(final String key, final Object value) {
 		Valid.checkNotNull(value, "Value with key '" + key + "' is null!");
 
-		map.put(key, value);
+		this.map.put(key, value);
 	}
 
 	/**
@@ -240,7 +240,7 @@ public final class SerializedMap extends StrictCollection {
 	public void override(final String key, final Object value) {
 		Valid.checkNotNull(value, "Value with key '" + key + "' is null!");
 
-		map.override(key, value);
+		this.map.override(key, value);
 	}
 
 	/**
@@ -250,7 +250,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public Object removeWeak(final String key) {
-		return map.removeWeak(key);
+		return this.map.removeWeak(key);
 	}
 
 	/**
@@ -260,7 +260,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public Object remove(final String key) {
-		return map.remove(key);
+		return this.map.remove(key);
 	}
 
 	/**
@@ -269,7 +269,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @param value
 	 */
 	public void removeByValue(final Object value) {
-		map.removeByValue(value);
+		this.map.removeByValue(value);
 	}
 
 	/**
@@ -301,6 +301,27 @@ public final class SerializedMap extends StrictCollection {
 	 */
 	public Location getLocation(final String key) {
 		return get(key, org.bukkit.Location.class, null);
+	}
+
+	/**
+	 * Returns a UUID from the map, or null if does not exist
+	 *
+	 * @param key
+	 * @return
+	 */
+	public UUID getUUID(final String key) {
+		return getUUID(key, null);
+	}
+
+	/**
+	 * Returns a UUID from the map, with an optional default
+	 *
+	 * @param key
+	 * @param def
+	 * @return
+	 */
+	public UUID getUUID(final String key, final UUID def) {
+		return get(key, UUID.class, def);
 	}
 
 	/**
@@ -476,7 +497,7 @@ public final class SerializedMap extends StrictCollection {
 					final Constructor<?> c = cl.getDeclaredConstructor(Map.class);
 					c.setAccessible(true);
 
-					final Object craftMeta = c.newInstance((Map<String, ?>) raw);
+					final Object craftMeta = c.newInstance(raw);
 
 					if (craftMeta instanceof ItemMeta)
 						item.setItemMeta((ItemMeta) craftMeta);
@@ -643,10 +664,10 @@ public final class SerializedMap extends StrictCollection {
 	public <T> List<T> getList(final String key, final Class<T> type) {
 		final List<T> list = new ArrayList<>();
 
-		if (!map.contains(key))
+		if (!this.map.contains(key))
 			return list;
 
-		final Object rawList = this.removeOnGet ? map.removeWeak(key) : map.get(key);
+		final Object rawList = this.removeOnGet ? this.map.removeWeak(key) : this.map.get(key);
 
 		// Forgive if string used instead of string list
 		if (type == String.class && rawList instanceof String) {
@@ -802,7 +823,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public <T> T get(final String key, final Class<T> type, final T def) {
-		Object raw = removeOnGet ? map.removeWeak(key) : map.get(key);
+		Object raw = this.removeOnGet ? this.map.removeWeak(key) : this.map.get(key);
 
 		// Try to get the value by key with ignoring case
 		if (raw == null)
@@ -822,7 +843,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public Object getValueIgnoreCase(final String key) {
-		for (final Entry<String, Object> e : map.entrySet())
+		for (final Entry<String, Object> e : this.map.entrySet())
 			if (e.getKey().equalsIgnoreCase(key))
 				return e.getValue();
 
@@ -833,7 +854,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @see Map#forEach(BiConsumer)
 	 */
 	public void forEach(final BiConsumer<String, Object> consumer) {
-		for (final Entry<String, Object> e : map.entrySet())
+		for (final Entry<String, Object> e : this.map.entrySet())
 			consumer.accept(e.getKey(), e.getValue());
 	}
 
@@ -843,35 +864,35 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public Map.Entry<String, Object> firstEntry() {
-		return isEmpty() ? null : map.getSource().entrySet().iterator().next();
+		return isEmpty() ? null : this.map.getSource().entrySet().iterator().next();
 	}
 
 	/**
 	 * @see Map#keySet()
 	 */
 	public Set<String> keySet() {
-		return map.keySet();
+		return this.map.keySet();
 	}
 
 	/**
 	 * @see Map#values()
 	 */
 	public Collection<Object> values() {
-		return map.values();
+		return this.map.values();
 	}
 
 	/**
 	 * @see Map#entrySet()
 	 */
 	public Set<Entry<String, Object>> entrySet() {
-		return map.entrySet();
+		return this.map.entrySet();
 	}
 
 	/**
 	 * @see Map#size()
 	 */
 	public int size() {
-		return map.size();
+		return this.map.size();
 	}
 
 	/**
@@ -880,7 +901,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @return
 	 */
 	public Map<String, Object> asMap() {
-		return map.getSource();
+		return this.map.getSource();
 	}
 
 	/**
@@ -888,7 +909,7 @@ public final class SerializedMap extends StrictCollection {
 	 */
 	@Override
 	public Object serialize() {
-		return map.serialize();
+		return this.map.serialize();
 	}
 
 	/**
@@ -913,7 +934,7 @@ public final class SerializedMap extends StrictCollection {
 	 * @see Map#isEmpty()
 	 */
 	public boolean isEmpty() {
-		return map.isEmpty();
+		return this.map.isEmpty();
 	}
 
 	/**
